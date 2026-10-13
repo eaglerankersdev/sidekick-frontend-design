@@ -8,6 +8,8 @@ async (page) => {
   await page.goto(base);
   const mascot = page.getByRole('button', {name: 'Say hi to SideKick'});
   await mascot.waitFor();
+  await mascot.click();
+  await page.waitForFunction(() => document.querySelector('[aria-label="Say hi to SideKick"]').dataset.greeting === 'true');
   const dashboard = page.locator('[class*="heroBrowser"]');
   const original = await dashboard.boundingBox();
   const bounds = await mascot.boundingBox();
@@ -19,7 +21,7 @@ async (page) => {
     await page.mouse.move(x, y);
     await waitLook(axis, sign);
   }
-  await page.waitForFunction(() => getComputedStyle(document.querySelector('[class*="HeroMascot"] [class*="head"]')).transform !== 'matrix(1, 0, 0, 1, 0, 0)');
+  await page.waitForFunction(() => getComputedStyle(document.querySelector('[aria-label="Say hi to SideKick"] [class*="head"]')).transform !== 'matrix(1, 0, 0, 1, 0, 0)');
   const after = await dashboard.boundingBox();
   if (JSON.stringify(original) !== JSON.stringify(after)) throw Error('Mascot shifted dashboard geometry');
   await mascot.hover();
