@@ -57,6 +57,30 @@
 
 .pet[data-dragging="true"] .character { cursor: grabbing; }
 
+.pet[data-pose="wave"] .bounce { animation: jump 650ms ease-out; }
+
+.greeting {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  padding: 5px 10px;
+  border: 1px solid #d6e4fb;
+  border-radius: 12px 12px 12px 3px;
+  background: #fff;
+  color: #002052;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 3px 12px rgb(0 32 82 / 12%);
+  pointer-events: none;
+}
+
+@keyframes jump {
+  0%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-22px); }
+  75% { transform: translateY(2px); }
+}
+
 .pet[data-pose="wave"] .sprite {
   background-position-y: 66.666667%;
   animation: frames 600ms steps(4) infinite;

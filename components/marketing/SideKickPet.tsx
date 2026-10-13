@@ -100,6 +100,9 @@ export function SideKickPet() {
     >
       <button className={styles.character} type="button" aria-label="Say hello to SideKick"
         title="Drag to move SideKick. Arrow keys also move it."
+        onPointerEnter={event => {
+          if (event.pointerType === "mouse" && !drag.current) react("wave");
+        }}
         onPointerDown={event => {
           if (event.button !== 0 || !position.current) return;
           dragged.current = false;
@@ -137,6 +140,7 @@ export function SideKickPet() {
           <span className={styles.sprite} data-pet-sprite />
         </span>
         <span className={styles.shadow} aria-hidden="true" />
+        {reaction === "wave" && <span className={styles.greeting} role="status">Hi!</span>}
       </button>
       <div className={styles.controls} role="group" aria-label="SideKick companion controls">
         <button type="button" aria-label={paused ? "Resume SideKick" : "Pause SideKick"} title={paused ? "Resume SideKick" : "Pause SideKick"} onClick={() => {

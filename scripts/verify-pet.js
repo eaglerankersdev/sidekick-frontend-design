@@ -8,6 +8,17 @@ async page => {
   if(start.x < 1200) throw Error('Pet does not start on the right');
   await page.waitForTimeout(8000); // Exceed the former automatic walking interval.
   if(JSON.stringify(start)!==JSON.stringify(await character.boundingBox())) throw Error('Pet moved without input');
+  await character.hover();
+  if(await character.evaluate(e=>e.parentElement.dataset.pose)!=='wave') throw Error('Hover greeting failed');
+  if(!await character.getByRole('status').isVisible()) throw Error('Hi bubble missing');
+  if(await character.evaluate(e=>getComputedStyle(e.firstElementChild).animationName)==='none') throw Error('Hover jump missing');
+  await page.waitForTimeout(1500);
+  if(await character.evaluate(e=>e.parentElement.dataset.pose)!=='idle') throw Error('Hover did not settle');
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.mouse.move(0,0); await character.hover();
+  if(!await character.getByRole('status').isVisible()) throw Error('Reduced-motion greeting missing');
+  if(await character.evaluate(e=>getComputedStyle(e.firstElementChild).animationName)!=='none') throw Error('Reduced-motion jump not disabled');
+  await page.emulateMedia({reducedMotion:'no-preference'});
   await page.mouse.move(start.x+50,start.y+50); await page.mouse.down();
   await page.mouse.move(400,350,{steps:12}); await page.mouse.up();
   let box=await character.boundingBox();
@@ -38,5 +49,5 @@ async page => {
   const moved=await pet.boundingBox();
   if(Math.abs(moved.x-110)>3||Math.abs(moved.y-260)>3) throw Error('Touch dragging failed');
   await ctx.close();
-  return 'Passed: stationary idle, right-side default, mouse/touch drag, keyboard movement, click greeting, resize bounds, menu obstruction, dismissal.';
+  return 'Passed: hover jump and Hi, reduced motion, stationary idle, right-side default, mouse/touch drag, keyboard movement, click greeting, resize bounds, menu obstruction, dismissal.';
 }
