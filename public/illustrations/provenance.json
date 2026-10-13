@@ -1,0 +1,36 @@
+{
+  "created": "2026-10-13",
+  "generator": "OpenAI image generation",
+  "originalLogo": "/Users/mac/sidekick-crm-logo.png",
+  "originalLogoPreserved": true,
+  "assets": [
+    {
+      "path": "sidekick-companion.webp",
+      "dimensions": "480 × 399",
+      "transparent": true,
+      "referenceImage": "/Users/mac/sidekick-crm-logo.png",
+      "prompt": "Use case: identity-preserve. Asset type: a transparent editorial mascot accent for the SideKick CRM marketing website. Input image is the authoritative SideKick CRM logo, used as a character reference only. Produce a standalone illustration of the SAME friendly superhero mascot from that image, head and upper torso with both white gloved hands resting on an invisible horizontal ledge at the bottom. Match the exact silhouette of swept spiky navy hair, navy eye mask, cobalt blue eyes, white face, charming small smile, thick navy outline, navy body. Head slightly tilted just as the original. Preserve the character's recognizable identity. Flat polished vector-like illustration with only a tiny amount of soft dimensional shading, no photorealism. Navy #002052 and cobalt #0062FD and white. Character centered with full head and hands visible, clean silhouette, generous transparent margins. No rectangular sign, no dashboard, no text, no letters, no wordmark, no additional objects, no background. This is a companion illustration, not a new logo. Genuine transparent alpha background."
+    },
+    {
+      "path": "service-neighborhood.webp",
+      "dimensions": "1200 × 800",
+      "transparent": false,
+      "prompt": "Use case: stylized-concept. Asset type: wide editorial illustration for SideKick CRM, a premium software brand for local service businesses. Make a wide 3:2 scene of a beautiful miniature suburban service-business neighborhood, isometric 3D illustration rendered like high-end matte architectural models. One modern white house with a cobalt blue roof, clean driveway with subtle pressure-washing water lines; a compact navy tow truck beside the street; stacked moving boxes neatly by a garage; a clean painting roller and small paint bucket resting near a freshly painted wall; one smooth concrete patio. Everything feels orderly, accomplished, human and inviting, no workers needed. Restrained navy #002052, saturated cobalt #0062FD, sky #87B5FF, white and very pale ice #E6F0FF only. Soft bright studio daylight, gentle realistic ambient shadows, round friendly but precise geometry, beautiful material quality. Composition: one coherent neighborhood scene on an ice-blue floor, plenty of empty ice background around the edges, central subject occupies 80 percent width. No text, no labels, no lettering, no logos, no numbers, no UI, no floating panels, no charts, no extraneous symbols. Actual illustration for web use, not a screenshot of a website. Background opaque pale ice blue."
+    },
+    {
+      "path": "sidekick-pet.webp",
+      "dimensions": "1024 × 1024",
+      "transparent": true,
+      "layout": "4 × 4 sprite atlas: idle, walk, wave, jump; four frames per row",
+      "toolMode": "imagegen edit with character references; transparent_background=true",
+      "referenceImages": [
+        "sidekick-companion.webp",
+        "/Users/mac/sidekick-crm-logo.png"
+      ],
+      "creationBrief": "A full-body chibi superhero companion with the same swept navy hair, white face and gloves, navy mask, blue eyes and friendly smile as the original SideKick. Navy suit, small cobalt cape and boots. Sixteen consistent frames on a transparent four-by-four grid: idle/blink, walking right, waving front, jumping. Palette #002052, #0062FD and white. No text, wordmark, scenery or extra objects.",
+      "sourceImage": "/Users/mac/.codex/generated_images/01a135fe-5a30-77f0-9ce1-54246d6c9e03/exec-52298487-80ef-46eb-859a-0f230b7d7b89.png",
+      "preparation": "Generated 1254 × 1254 PNG resized to a 1024 × 1024 WebP atlas with Sharp; original retained."
+    }
+  ],
+  "preparation": "Generated PNGs optimized to WebP with Sharp. Original logo remains separate and unchanged."
+}

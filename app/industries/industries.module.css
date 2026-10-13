@@ -1,0 +1,95 @@
+.cards {
+  margin-top: 8px;
+}
+.card {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+.card h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+.card :global(.text-link) {
+  margin-top: 8px;
+}
+.cardArt {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 120px;
+  border-radius: var(--r-md);
+  background: linear-gradient(135deg, var(--ice), #d4e4ff);
+  color: var(--cobalt);
+  overflow: hidden;
+}
+.cardArt::after {
+  content: "";
+  position: absolute;
+  right: -30px;
+  bottom: -40px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: rgb(135 181 255 / 0.35);
+}
+.cardArt svg {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  transition: transform 0.4s var(--ease-spring);
+}
+.card:hover .cardArt svg {
+  transform: scale(1.12) rotate(-6deg);
+}
+.cardOther {
+  background: linear-gradient(160deg, var(--white), var(--ice));
+}
+.twoCol {
+  display: grid;
+  gap: 20px;
+}
+.col h2 {
+  font-size: var(--fs-h2);
+  margin-bottom: 12px;
+}
+.colNavy {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+.colNavy :global(.eyebrow) {
+  color: var(--light-blue);
+}
+.colNavy :global(.lead) {
+  color: #b9cdea;
+}
+.colNavy :global(.check-list li) {
+  color: #fff;
+}
+.colNavy :global(.check-list li svg) {
+  background: rgb(255 255 255 / 0.12);
+  color: var(--light-blue);
+}
+.sharedList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+.sharedList li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+}
+@media (min-width: 900px) {
+  .twoCol {
+    grid-template-columns: 1.2fr 1fr;
+  }
+}
+
+.neighborhood { width: 100%; border-radius: var(--r-xl); }

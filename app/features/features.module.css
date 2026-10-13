@@ -1,0 +1,95 @@
+.workspaces {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+}
+.wsCard {
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+.wsNum {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--cobalt);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+.wsRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.wsRow span {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--ice);
+  color: var(--cobalt);
+}
+.wsRow svg {
+  width: 20px;
+  height: 20px;
+}
+.shared {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 28px;
+  padding: 14px 18px;
+  border-radius: var(--r-md);
+  background: var(--white);
+  border: 1px solid var(--border);
+  font-weight: 700;
+  text-align: center;
+}
+.shared svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--cobalt);
+}
+.quoteStack { display: grid; gap: 16px; }
+.quoteStackBack { width: 100%; }
+.roles {
+  display: grid;
+  gap: 10px;
+  padding: 20px;
+  border-radius: var(--r-lg);
+  background: rgb(255 255 255 / 0.06);
+  border: 1px solid rgb(255 255 255 / 0.12);
+}
+.roleRow {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  background: var(--white);
+  color: var(--navy);
+}
+.roleRow span {
+  font-size: 0.85rem;
+  color: var(--muted-strong);
+  font-weight: 600;
+}
+.roleDots {
+  display: flex;
+  gap: 4px;
+}
+.roleDots b {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border);
+}
+.roleDots[data-n="1"] b:nth-child(-n + 1),
+.roleDots[data-n="2"] b:nth-child(-n + 2),
+.roleDots[data-n="3"] b:nth-child(-n + 3) {
+  background: var(--cobalt);
+}

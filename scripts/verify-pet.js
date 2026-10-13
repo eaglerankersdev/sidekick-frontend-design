@@ -1,0 +1,42 @@
+// Run with playwright-cli run-code --filename=scripts/verify-pet.js.
+async page => {
+  await page.setViewportSize({width:1440,height:1000});
+  await page.goto('http://127.0.0.1:3000/');
+  const character=page.getByRole('button',{name:'Say hello to SideKick',exact:true});
+  await character.waitFor();
+  const start=await character.boundingBox();
+  if(start.x < 1200) throw Error('Pet does not start on the right');
+  await page.waitForTimeout(8000); // Exceed the former automatic walking interval.
+  if(JSON.stringify(start)!==JSON.stringify(await character.boundingBox())) throw Error('Pet moved without input');
+  await page.mouse.move(start.x+50,start.y+50); await page.mouse.down();
+  await page.mouse.move(400,350,{steps:12}); await page.mouse.up();
+  let box=await character.boundingBox();
+  if(Math.abs(box.x-350)>2||Math.abs(box.y-300)>2) throw Error('Drag did not follow pointer');
+  if(await character.evaluate(e=>e.parentElement.dataset.pose)!=='idle') throw Error('Drag triggered a greeting');
+  await character.press('ArrowRight');
+  if((await character.boundingBox()).x!==box.x+20) throw Error('Keyboard movement failed');
+  await character.click();
+  if(await character.evaluate(e=>e.parentElement.dataset.pose)!=='wave') throw Error('Click greeting failed');
+  await page.setViewportSize({width:320,height:600});
+  box=await character.boundingBox();
+  if(box.x<0||box.x+box.width>320||box.y+box.height>600) throw Error('Resize clipped pet');
+  await page.getByRole('button',{name:'Open menu',exact:true}).click();
+  if(await character.isVisible()) throw Error('Pet obstructs menu');
+  await page.keyboard.press('Escape');
+  await character.waitFor();
+  await character.focus();
+  await page.getByRole('button',{name:'Hide SideKick for this visit'}).click();
+  if(await character.count()) throw Error('Dismiss failed');
+  const ctx=await page.context().browser().newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+  const mobile=await ctx.newPage(); await mobile.goto('http://127.0.0.1:3000/');
+  const pet=mobile.getByRole('button',{name:'Say hello to SideKick',exact:true}); await pet.waitFor();
+  const bounds=await pet.boundingBox();
+  const cdp=await ctx.newCDPSession(mobile);
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:bounds.x+40,y:bounds.y+40}]});
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:150,y:300}]});
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  const moved=await pet.boundingBox();
+  if(Math.abs(moved.x-110)>3||Math.abs(moved.y-260)>3) throw Error('Touch dragging failed');
+  await ctx.close();
+  return 'Passed: stationary idle, right-side default, mouse/touch drag, keyboard movement, click greeting, resize bounds, menu obstruction, dismissal.';
+}

@@ -1,0 +1,47 @@
+.identity {
+  display: grid;
+  gap: 10px;
+  padding: 20px;
+  border-radius: var(--r-xl);
+  background: var(--canvas);
+  border: 1px solid var(--border);
+}
+.idRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: var(--r-md);
+  background: var(--white);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.idLogo {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+.idRow strong {
+  display: block;
+}
+.idRow em {
+  font-style: normal;
+  font-size: 0.85rem;
+  color: var(--muted-strong);
+  font-weight: 600;
+}
+.idFoot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 4px 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--muted-strong);
+}
+.idFoot svg {
+  width: 16px;
+  height: 16px;
+  color: var(--cobalt);
+}

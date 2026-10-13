@@ -1,0 +1,14 @@
+.mascot { --look-x: 0; --look-y: 0; display: block; aspect-ratio: 480 / 399; padding: 0; border: 0; background: transparent; color: var(--navy); cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.mascot > svg { display: block; width: 100%; height: auto; overflow: visible; }
+.mascot:focus-visible { outline: 2px solid var(--cobalt); outline-offset: 5px; border-radius: 24px; }
+.head { transform-origin: 240px 335px; transform: translate(calc(var(--look-x) * 3px), calc(var(--look-y) * 2px)) rotate(calc(var(--look-x) * 4deg)); transition: transform 220ms ease-out; }
+.pupils { transform: translate(calc(var(--look-x) * 10px), calc(var(--look-y) * 6px)); transition: transform 120ms ease-out; }
+.hand { transform-origin: 326px 389px; }
+.mascot[data-greeting="true"] .hand { animation: wave 1.3s ease-in-out; }
+.hello { position: absolute; top: 10%; right: -4px; padding: 5px 10px; border: 1px solid var(--border-strong); border-radius: 12px 12px 12px 2px; background: white; font-size: .8rem; font-weight: 700; box-shadow: 0 4px 12px rgb(0 32 82 / .08); opacity: 0; transform: translateY(3px); transition: opacity .15s, transform .15s; pointer-events: none; }
+.mascot[data-greeting="true"] .hello { opacity: 1; transform: none; }
+@keyframes wave { 0%, 100% { transform: none; } 18%, 46%, 74% { transform: translate(8px, -34px) rotate(20deg); } 32%, 60%, 86% { transform: translate(8px, -34px) rotate(-14deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .head, .pupils, .hello { transition: none; transform: none; }
+  .mascot[data-greeting="true"] .hand { animation: none; }
+}

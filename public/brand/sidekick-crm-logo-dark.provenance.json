@@ -1,0 +1,9 @@
+{
+  "asset": "sidekick-crm-logo-dark.webp",
+  "tool": "Built-in image_gen",
+  "reference": "sidekick-crm-logo.png",
+  "prompt": "Edit original Sidekick CRM logo for navy background. Render on uniform solid dark navy #002052. Preserve the recognizable mascot, white face and gloves, navy mask, and blue eyes. Add a thin ice-blue mascot contour. Remove the white-filled sign; use standalone white Sidekick lettering and sky-blue CRM lettering. Keep the horizontal composition and clean smooth typography, without texture or distressing.",
+  "dimensions": [1018, 387],
+  "transparent": false,
+  "preparation": "Clean navy-background generation resized and optimized to WebP. Transparent export attempts were rejected because they introduced edge artifacts. Footer uses lighten blending and 90% brightness to integrate the navy matte. Original header asset unchanged."
+}

@@ -1,0 +1,46 @@
+.mascot {
+  position: relative;
+  padding: clamp(24px, 4vw, 48px);
+  border-radius: var(--r-xl);
+  background: linear-gradient(160deg, var(--ice), #d8e7ff);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.mascot::before {
+  content: "";
+  position: absolute;
+  inset: auto -20% -40% auto;
+  width: 60%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgb(135 181 255 / 0.35);
+}
+.mascot img {
+  position: relative;
+  width: 100%;
+  height: auto;
+}
+.quoteCard {
+  padding: clamp(28px, 4vw, 48px);
+  border-radius: var(--r-xl);
+  background: rgb(255 255 255 / 0.06);
+  border: 1px solid rgb(255 255 255 / 0.12);
+}
+.quoteCard p {
+  font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  background: linear-gradient(100deg, #fff, #87b5ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.path {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+}
+.path :global(.text-link) {
+  margin-top: 8px;
+}

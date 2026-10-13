@@ -1,0 +1,8 @@
+{
+  "asset": "sidekick-crm-logo-footer.webp",
+  "tool": "Built-in image_gen",
+  "reference": "User-supplied screenshot codex-clipboard-a55078be-740e-4173-a286-2a28f2553019.png",
+  "prompt": "Precisely reproduce the approved logo in this screenshot on a flat solid #002052 NAVY background. Remove all application UI, timestamp, top text and bottom buttons. Keep this exact logo design: navy spiky-haired masked mascot, pale blue thin silhouette outline, white face and gloves, white Sidekick wordmark inside thin WHITE rounded rectangle outline with NAVY interior (not white fill), blue CRM outside to right. Match reference letter shapes, spacing and proportions exactly. NO glow whatsoever. NO light rays, NO haze, NO drop shadow, NO gradient, NO texture. Crisp flat solid fills and smooth edges. Entire background and empty interior of outlined sign are uniform solid #002052 navy. Small margin, horizontal crop. Text exactly Sidekick CRM.",
+  "transparent": false,
+  "preparation": "Generated navy-background adaptation, resized to 1024 x 490 WebP. Footer retains existing navy-matte blending."
+}

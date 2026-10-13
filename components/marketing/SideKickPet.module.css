@@ -1,0 +1,115 @@
+.pet {
+  --pet-size: 100px;
+  position: fixed;
+  z-index: 45;
+  left: 0;
+  top: 0;
+  width: var(--pet-size);
+  height: var(--pet-size);
+  transform: translate(calc(100vw - var(--pet-size) - 16px), calc(100dvh - var(--pet-size) - 80px));
+  isolation: isolate;
+  pointer-events: none;
+}
+
+.pet[hidden] { display: none; }
+
+.character {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 18px;
+  background: transparent;
+  cursor: grab;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bounce, .sprite {
+  display: block;
+  width: var(--pet-size);
+  height: var(--pet-size);
+  pointer-events: none;
+}
+
+.sprite {
+  position: relative;
+  z-index: 1;
+  background: url("/illustrations/sidekick-pet.webp") 0 0 / 400% 400% no-repeat;
+  filter: drop-shadow(0 3px 2px rgb(0 32 82 / 10%));
+}
+
+.shadow {
+  position: absolute;
+  bottom: 0;
+  left: 28%;
+  width: 44%;
+  height: 5px;
+  border-radius: 50%;
+  background: rgb(0 32 82 / 12%);
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.pet[data-dragging="true"] .character { cursor: grabbing; }
+
+.pet[data-pose="wave"] .sprite {
+  background-position-y: 66.666667%;
+  animation: frames 600ms steps(4) infinite;
+}
+
+.controls {
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 0;
+  display: flex;
+  padding: 2px;
+  width: 92px;
+  border: 1px solid #d6e4fb;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgb(0 32 82 / 10%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+
+.pet:hover .controls, .pet:focus-within .controls {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.controls button {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #002052;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.controls button:hover { background: #edf4ff; }
+.character:focus-visible, .controls button:focus-visible { outline: 2px solid #0062fd; outline-offset: 3px; }
+
+.pet[data-still="true"] .sprite,
+.pet[data-still="true"] .bounce,
+.pet[data-still="true"] .shadow { animation: none; }
+.pet[data-still="true"][data-pose="wave"] .sprite { background-position-x: 66.666667%; }
+
+@keyframes frames { from { background-position-x: 0; } to { background-position-x: 133.333333%; } }
+
+@media (max-width: 600px) { .pet { --pet-size: 80px; } }
+@media (prefers-reduced-motion: reduce) {
+  .pet *, .pet *::before, .pet *::after { animation: none !important; transition: none !important; }
+}
+@media print { .pet { display: none; } }

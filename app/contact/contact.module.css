@@ -1,0 +1,32 @@
+.layout {
+  display: grid;
+  gap: 32px;
+  align-items: start;
+}
+.formCol {
+  min-width: 0;
+}
+.aside {
+  display: grid;
+  gap: 14px;
+}
+.asideCard p a {
+  color: var(--cobalt);
+  font-weight: 700;
+}
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 8px 4px;
+}
+@media (min-width: 1024px) {
+  .layout {
+    grid-template-columns: 1.4fr 1fr;
+    gap: 56px;
+  }
+  .aside {
+    position: sticky;
+    top: calc(var(--header-h) + 32px);
+  }
+}

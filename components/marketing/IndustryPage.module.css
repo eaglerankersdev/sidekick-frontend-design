@@ -1,0 +1,39 @@
+.heroVisual {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: var(--r-xl);
+  background: linear-gradient(160deg, var(--ice), #d8e7ff);
+  border: 1px solid var(--border);
+}
+.stack, .stackWide { display: grid; gap: 16px; }
+.stackFront, .stackFrontSm { min-width: 0; }
+.phoneCorner { width: 170px; justify-self: center; }
+.layout {
+  display: grid;
+  gap: 32px;
+  align-items: start;
+}
+.aside {
+  min-width: 0;
+}
+.asideCard {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: var(--r-lg);
+  background: var(--canvas);
+  border: 1px solid var(--border);
+}
+@media (min-width: 1024px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 400px;
+    gap: 48px;
+  }
+  .aside {
+    position: sticky;
+    top: calc(var(--header-h) + 32px);
+  }
+}
+
+@media (max-width: 700px) { .heroVisual { padding: 14px; } }

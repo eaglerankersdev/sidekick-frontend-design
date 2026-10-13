@@ -1,0 +1,14 @@
+{
+  "assets": {
+    "cursor.svg": "https://cursor.com/marketing-static/favicon-light.svg",
+    "mcp.svg": "https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/modelcontextprotocol.svg",
+    "meta.svg": "https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/meta.svg",
+    "claude.svg": "https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/claude.svg",
+    "stripe.svg": "https://stripe.com/newsroom/information",
+    "gmail.png": "https://www.gstatic.com/images/branding/product/2x/gmail_2020q4_48dp.png",
+    "google-ads.png": "https://www.gstatic.com/images/branding/product/2x/ads_48dp.png",
+    "callrail.svg": "https://main--dotcom-prod.netlify.app/assets/svg/logos/callrail-logotype.svg",
+    "chatgpt.svg": "https://raw.githubusercontent.com/simple-icons/simple-icons/14.0.0/icons/openai.svg"
+  },
+  "usage": "Brand marks identify third-party products. Availability is stated separately; no endorsement or active integration is implied."
+}

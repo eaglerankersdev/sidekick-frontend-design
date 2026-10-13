@@ -1,0 +1,165 @@
+.journey {
+  display: grid;
+  gap: 32px;
+}
+.steps {
+  position: relative;
+  display: grid;
+  gap: 16px;
+}
+.track {
+  display: none;
+}
+.step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 16px;
+  padding: 22px;
+  border-radius: var(--r-lg);
+  background: var(--white);
+  border: 1px solid var(--border);
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s var(--ease-out);
+}
+.step h3 {
+  font-size: 1.3rem;
+  margin: 2px 0 6px;
+}
+.step p {
+  color: var(--muted-strong);
+  font-size: 0.98rem;
+}
+.stepIndex {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cobalt);
+}
+.stepIcon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--ice);
+  color: var(--cobalt);
+  transition: background-color 0.3s, color 0.3s, transform 0.4s var(--ease-spring);
+}
+.stepIcon svg {
+  width: 22px;
+  height: 22px;
+}
+.inlineVisual {
+  grid-column: 1 / -1;
+  margin-top: 6px;
+}
+.stage {
+  display: none;
+}
+
+@media (min-width: 960px) {
+  .journey {
+    grid-template-columns: 1fr 1.15fr;
+    gap: 64px;
+    align-items: start;
+  }
+  .steps {
+    gap: 0;
+    padding-left: 36px;
+  }
+  .track {
+    display: block;
+    position: absolute;
+    left: 10px;
+    top: 40px;
+    bottom: 40px;
+    width: 3px;
+    border-radius: 3px;
+    background: var(--border);
+    overflow: hidden;
+  }
+  .progress {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(var(--cobalt), var(--light-blue));
+    transform-origin: top;
+    transform: scaleY(0);
+  }
+  .step {
+    margin-block: 10px;
+    opacity: 1;
+    border-color: transparent;
+    background: transparent;
+    transform: translateX(0);
+  }
+  .step::before {
+    content: "";
+    position: absolute;
+    left: -32px;
+    top: 40px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--border-strong);
+    box-shadow: 0 0 0 4px var(--canvas);
+    transition: background-color 0.3s, transform 0.3s;
+  }
+  .stepActive {
+    opacity: 1;
+    background: var(--white);
+    border-color: var(--border);
+    box-shadow: var(--shadow-md);
+    transform: translateX(6px);
+  }
+  .stepActive::before {
+    background: var(--cobalt);
+    transform: scale(1.25);
+  }
+  .stepActive .stepIcon {
+    background: var(--cobalt);
+    color: #fff;
+    transform: none;
+  }
+  .inlineVisual {
+    display: none;
+  }
+  .stage {
+    display: block;
+    position: sticky;
+    top: calc(var(--header-h) + 40px);
+  }
+  .stageInner {
+    position: relative;
+    display: grid;
+    gap: 14px;
+    padding: 20px;
+    border-radius: var(--r-xl);
+    background: linear-gradient(160deg, var(--ice), #d8e7ff 60%, #cfe0ff);
+    border: 1px solid var(--border);
+    min-height: 480px;
+  }
+  .visuals {
+    position: relative;
+    min-height: 400px;
+  }
+  .visual {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-content: center;
+    will-change: transform, opacity;
+  }
+}
+
+/* Static reading order must also replace the overlapping desktop stage. */
+@media (prefers-reduced-motion: reduce) {
+  .journey { grid-template-columns: 1fr; }
+  .steps { padding-left: 0; gap: 20px; }
+  .step { margin: 0; background: var(--white); border-color: var(--border); transform: none; opacity: 1; }
+  .step::before, .track, .stage { display: none; }
+  .inlineVisual { display: block; }
+}
+@media (prefers-reduced-motion: reduce) and (min-width: 960px) {
+  .steps { grid-template-columns: 1fr 1fr; }
+}

@@ -1,0 +1,64 @@
+.wrap {
+  display: grid;
+  gap: 16px;
+}
+.picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  cursor: pointer;
+  padding: 8px 14px 8px 10px;
+  border-radius: 999px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--navy);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s var(--ease-out);
+}
+.swatch i {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--sw2), var(--sw));
+}
+.swatch:hover {
+  transform: translateY(-1px);
+}
+.swatchOn {
+  border-color: var(--cobalt);
+  box-shadow: 0 0 0 3px var(--ice);
+}
+.dark .swatch {
+  background: rgb(255 255 255 / 0.08);
+  border-color: rgb(255 255 255 / 0.15);
+  color: #fff;
+}
+.dark .swatchOn {
+  border-color: var(--light-blue);
+  box-shadow: 0 0 0 3px rgb(135 181 255 / 0.3);
+}
+.stage {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--r-xl);
+  background: linear-gradient(160deg, var(--ice), #fff);
+  border: 1px solid var(--border);
+  transition: background 0.4s;
+}
+.dark .stage {
+  background: rgb(255 255 255 / 0.06);
+  border-color: rgb(255 255 255 / 0.12);
+}
+
+.swatch:has(input:focus-visible) { outline: 3px solid var(--cobalt); outline-offset: 4px; }
+
+.dark { max-width: 1060px; margin-inline: auto; }
+.dark .picker { justify-content: center; }
