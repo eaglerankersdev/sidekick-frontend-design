@@ -287,7 +287,8 @@
   .heroCopy :global(.btn) { padding-inline: 14px; font-size: .9rem; }
 }
 @media (max-width: 600px) {
-  .hero { padding-top: 28px; }
+  .hero { padding-top: 20px; }
+  .heroInner { gap: 24px; }
   .heroCopy { text-align: center; margin-inline: auto; }
   .heroCopy h1 { font-size: clamp(2.15rem, 10vw, 3.2rem); }
   .kicker { font-size: .75rem; margin-bottom: 16px; }
@@ -295,13 +296,13 @@
   .heroCopy :global(.btn-row) { display: grid; grid-template-columns: 1fr; gap: 2px; }
   .heroCopy :global(.btn) { min-height: 48px; }
   .heroFacts { justify-content: center; margin-top: 14px; gap: 8px; font-size: .7rem; }
-  .heroVisual { padding-top: 74px; gap: 12px; }
+  .heroVisual { order: -1; padding: 64px 0 0; gap: 10px; }
   .mascot { width: 92px; right: 18px; }
-  .heroState { width: 100%; justify-content: center; padding: 10px 12px; }
+  .heroState { display: none; }
   .heroState > span { display: grid; }
   .heroState strong { font-size: .8rem; }
   .heroState small { font-size: .7rem; }
-  .heroOrbit { inset: 48px -6px 45px; }
+  .heroOrbit { inset: 38px -6px 26px; }
   .serviceStrip > div { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; gap: 8px; padding-bottom: 8px; scroll-snap-type: x proximity; }
   .serviceStrip a { flex: none; padding: 8px 12px; border: 1px solid var(--border); border-radius: 100px; background: white; scroll-snap-align: start; }
   .audiences { padding-top: 0; }

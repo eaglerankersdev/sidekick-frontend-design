@@ -15,7 +15,8 @@ async page => {
     const mascot = await page.locator('[class*="_heroBrowser"] [class*="_mascot"]').first().boundingBox();
     const copy = await page.locator('[class*="_heroCopy"]').first().boundingBox();
     check(mascot.y + mascot.height <= browser.y + 10, `${width}: mascot overlaps dashboard`);
-    if (width < 900) check(mascot.y >= copy.y + copy.height, `${width}: mascot overlaps hero copy`);
+    if (width <= 600) check(browser.y + browser.height < copy.y, `${width}: preview must precede hero copy`);
+    else if (width < 900) check(mascot.y >= copy.y + copy.height, `${width}: mascot overlaps hero copy`);
     check(browser.x >= 0 && browser.x + browser.width <= width, `${width}: preview clips horizontally`);
     if (width <= 600) {
       const primary = await page.locator('[class*="_heroCopy"] a[href="/contact"]').boundingBox();
