@@ -3,8 +3,8 @@
 /**
  * Signature interaction #1: Lead → Quote → Job → Invoice visual journey.
  * Desktop: the step list pins while the preview card on the right cross-fades
- * as the user scrolls (GSAP ScrollTrigger, scrub). Mobile / reduced motion:
- * plain stacked blocks, no pinning, no scroll-jacking.
+ * as the user scrolls. Mobile uses a measured horizontal story driven by normal
+ * page scrolling. Reduced motion and short viewports retain the readable list.
  */
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
@@ -49,6 +49,26 @@ function Visual({ k }: { k: string }) {
     default:
       return <InvoiceMock />;
   }
+}
+
+const records = [
+  { title: "Driveway & walkway clean", status: "New request", rows: [["Customer", "Jamie Taylor"], ["Source", "Website form"], ["Service", "Pressure washing"]] },
+  { title: "Jamie Taylor", status: "New lead", rows: [["Assigned to", "Alex Morgan"], ["Property", "128 Oak Street"], ["Next step", "Prepare quote"]] },
+  { title: "Quote #1042", status: "Ready to review", rows: [["Driveway clean", "$180.00"], ["Walkway clean", "$60.00"], ["Total", "$240.00"]] },
+  { title: "Job #1042", status: "Created", rows: [["Customer", "Jamie Taylor"], ["Service", "Driveway & walkway"], ["Quote", "#1042 · accepted"]] },
+  { title: "Tuesday, 9:00 AM", status: "Scheduled", rows: [["Crew", "Crew A · 2 people"], ["Vehicle", "Truck 01"], ["Equipment", "Pressure washer"]] },
+  { title: "Invoice #1042", status: "Ready to send", rows: [["Customer", "Jamie Taylor"], ["Linked job", "#1042 · completed"], ["Amount due", "$240.00"]] },
+  { title: "Payment received", status: "Paid", rows: [["Invoice", "#1042"], ["Amount", "$240.00"], ["Collected through", "Your Stripe account"]] },
+];
+
+function MobileRecord({ index }: { index: number }) {
+  const record = records[index];
+  return <div className={s.record}>
+    <div className={s.recordHeader}><span>Sample job · 1042</span><span className={s.recordStatus}>{record.status}</span></div>
+    <strong className={s.recordTitle}>{record.title}</strong>
+    <dl>{record.rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
+    <p className={s.recordFoot}>One customer. One connected record.</p>
+  </div>;
 }
 
 export function WorkflowJourney() {
@@ -110,11 +130,65 @@ export function WorkflowJourney() {
       gsap.set(el.querySelectorAll(`.${s.visual}`), { clearProps: "all" });
     });
 
+    mm.add('(max-width: 959px) and (prefers-reduced-motion: no-preference)', () => {
+      const viewport = el.querySelector<HTMLElement>(`.${s.mobileViewport}`)!;
+      const rail = el.querySelector<HTMLElement>(`.${s.steps}`)!;
+      let tween: gsap.core.Tween | undefined;
+      let previousWidth = 0;
+      let previousHeight = 0;
+      const reset = () => {
+        tween?.scrollTrigger?.kill();
+        tween?.kill();
+        gsap.set(rail, { clearProps: "transform" });
+        delete el.dataset.mobileScroll;
+        el.style.removeProperty("height");
+      };
+      const measure = () => {
+        const width = el.clientWidth;
+        const height = window.innerHeight;
+        if (width === previousWidth && height === previousHeight) return;
+        previousWidth = width;
+        previousHeight = height;
+        reset();
+        el.dataset.mobileScroll = "true";
+        const top = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) + 12;
+        // Never trap tall content behind the browser chrome or fixed navigation.
+        if (viewport.offsetHeight + top + 24 > height) {
+          reset();
+          return;
+        }
+        const distance = rail.scrollWidth - viewport.clientWidth;
+        const scrollDistance = Math.min(viewport.clientWidth, 300) * (steps.length - 1);
+        el.style.height = `${viewport.offsetHeight + scrollDistance}px`;
+        tween = gsap.to(rail, {
+          x: -distance, ease: "none",
+          scrollTrigger: {
+            trigger: el, start: `top ${top}px`, end: `+=${scrollDistance}`, scrub: true,
+            onUpdate: self => setActive(Math.round(self.progress * (steps.length - 1))),
+          },
+        });
+      };
+      const observer = new ResizeObserver(measure);
+      observer.observe(el);
+      window.addEventListener('resize', measure);
+      let mounted = true;
+      document.fonts.ready.then(() => { if (mounted) { previousWidth = 0; measure(); ScrollTrigger.refresh(); } });
+      measure();
+      return () => {
+        mounted = false;
+        observer.disconnect();
+        window.removeEventListener('resize', measure);
+        reset();
+      };
+    });
+
     return () => mm.revert();
   }, []);
 
   return (
-    <div ref={root} className={s.journey}>
+    <div ref={root} className={s.journey} data-workflow-journey>
+      <div className={s.mobileViewport}>
+      <div className={s.mobileProgress} aria-hidden="true"><span>Scroll to follow the work</span><span>{String(active + 1).padStart(2, "0")} / 07</span></div>
       <div className={s.steps}>
         <span className={s.track} aria-hidden>
           <span className={s.progress} />
@@ -122,7 +196,7 @@ export function WorkflowJourney() {
         {steps.map((st, i) => {
           const Icon = st.icon;
           return (
-            <div key={st.key} data-touch-reveal className={`${s.step} ${active === i ? s.stepActive : ""}`}>
+            <div key={st.key} data-workflow-card className={`${s.step} ${active === i ? s.stepActive : ""}`}>
               <span className={s.stepIcon}>
                 <Icon aria-hidden />
               </span>
@@ -133,11 +207,13 @@ export function WorkflowJourney() {
               </div>
               {/* Mobile-only inline visual (hidden on desktop by CSS) */}
               <div className={s.inlineVisual}>
-                <Visual k={st.key} />
+                <MobileRecord index={i} />
               </div>
             </div>
           );
         })}
+      </div>
+      <div className={s.mobileMeter} aria-hidden="true"><span style={{ transform: `scaleX(${(active + 1) / steps.length})` }} /></div>
       </div>
       <div className={s.stage} aria-hidden>
         <div className={s.stageInner}>
