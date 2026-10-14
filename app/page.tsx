@@ -10,7 +10,7 @@ import { IndustrySwitcher } from "@/components/marketing/IndustrySwitcher";
 import { CTASection, FeatureStatusBadge } from "@/components/marketing/ui";
 import { Browser, Phone, DashboardMock, JobPhoneMock, AISuggestionMock, BuilderMock, ProposalMock, PreviewLabel } from "@/components/mocks/Mocks";
 import { industries } from "@/content/industries";
-import { NavIcon } from "@/components/marketing/NavIcon";
+import { IndustryMarquee } from "@/components/marketing/IndustryMarquee";
 import { plans } from "@/content/pricing";
 import s from "./home.module.css";
 
@@ -56,11 +56,8 @@ export default function HomePage() {
             <span className={s.heroLabel}><PreviewLabel /></span>
           </div>
         </div>
-        <div className={`container ${s.serviceStrip}`}>
-          <p>Made for your kind of work</p>
-          <div>{industries.map((ind) => <Link href={`/industries/${ind.slug}`} key={ind.slug}><NavIcon name={ind.icon} />{ind.navName}</Link>)}</div>
-        </div>
       </section>
+      <IndustryMarquee items={industries.map(ind => ({ name: ind.navName, icon: ind.icon }))} />
       <div className={`container ${s.audiences}`}>
         <Link href="/features"><BriefcaseBusiness aria-hidden /><span><strong>I run a service business</strong><small>Less admin. More time for the work.</small></span><ArrowRight aria-hidden /></Link>
         <Link href="/white-label"><Palette aria-hidden /><span><strong>I want to offer my own CRM</strong><small>Your brand, powered by SideKick.</small></span><ArrowRight aria-hidden /></Link>
