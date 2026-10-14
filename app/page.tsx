@@ -28,9 +28,12 @@ export default function HomePage() {
         <div className={s.heroBg} aria-hidden><HeroField /></div>
         <div className={`container ${s.heroInner}`}>
           <div className={s.heroCopy}>
+            <div className={s.heroIntro}>
             <span className={s.kicker}><Layers3 aria-hidden /> Built for service businesses</span>
             <h1>Your business.<br /><span>Your SideKick.</span></h1>
             <p className="lead">From the first service request to the paid invoice. Bring your leads, quotes, jobs and team together in one connected CRM.</p>
+            </div>
+            <div className={s.heroControls}>
             <div className="btn-row">
               <Link href="/contact" className="btn btn--primary">Book a Demo <ArrowRight aria-hidden /></Link>
               <Link href="#workflow" className={`btn btn--ghost ${s.watch}`}><Play aria-hidden /> See how it works</Link>
@@ -40,6 +43,7 @@ export default function HomePage() {
               <li><Check aria-hidden /> Your team</li>
               <li><Check aria-hidden /> Your control</li>
             </ul>
+            </div>
           </div>
           <div className={s.heroVisual}>
             <div className={s.heroOrbit} aria-hidden />

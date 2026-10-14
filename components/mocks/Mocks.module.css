@@ -1219,3 +1219,12 @@
   .mobilePreview .main { padding: 12px; }
   .mobilePreview .row { min-height: 44px; }
 }
+
+@media (max-width: 600px) and (max-height: 700px) {
+  .mobilePreview .main { padding: 8px; gap: 8px; }
+  .mobilePreview .kpi { padding: 8px; gap: 4px; }
+  .mobilePreview .kpiHint { display: none; }
+  .mobilePreview .row:nth-child(n + 3) { display: none; }
+  .mobilePreview .panel { padding: 8px; gap: 2px; }
+  .mobilePreview .row { min-height: 32px; }
+}
