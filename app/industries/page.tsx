@@ -4,7 +4,6 @@ import Image from "next/image";
 import { ArrowRight, Check, Sparkles, Users, FileText, Briefcase, CalendarDays, Receipt, BarChart3, Inbox } from "lucide-react";
 import { PageHero, CTASection, FeatureStatusBadge } from "@/components/marketing/ui";
 import { IndustrySwitcher } from "@/components/marketing/IndustrySwitcher";
-import { NavIcon } from "@/components/marketing/NavIcon";
 import { industries } from "@/content/industries";
 import s from "./industries.module.css";
 
@@ -51,8 +50,8 @@ export default function IndustriesPage() {
           <div className={`grid grid--3 ${s.cards}`} data-reveal-stagger>
             {industries.map((ind) => (
               <Link key={ind.slug} href={`/industries/${ind.slug}`} className={`card card--hover ${s.card}`}>
-                <div className={s.cardArt} aria-hidden>
-                  <NavIcon name={ind.icon} />
+                <div className={s.cardPhoto} aria-hidden>
+                  <Image src={`/images/industries/${ind.slug}.svg`} alt="" width={800} height={500} sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 400px" />
                 </div>
                 <h3>{ind.name}</h3>
                 <p>{ind.cardBlurb}</p>
