@@ -259,3 +259,55 @@
   .heroLabel { grid-column: 2; grid-row: 2; align-self: center; margin: 0; text-align: center; }
   .heroLabel > span { line-height: 1.4; }
 }
+
+/* Touch layouts: one clear product preview and a shorter reading path.
+   Desktop (1080px+) intentionally retains the original composition. */
+@media (max-width: 1079px) {
+  .hero { padding-top: 36px; }
+  .heroInner { gap: 8px; }
+  .heroCopy { padding-bottom: 0; }
+  .heroCopy h1 { font-size: clamp(2.5rem, 6.7vw, 3.5rem); }
+  .heroCopy :global(.lead) { margin-block: 20px 24px; line-height: 1.65; }
+  .kicker { margin-bottom: 20px; }
+  .heroVisual { display: grid; grid-template-columns: 1fr; gap: 14px; max-width: 580px; width: 100%; margin-inline: auto; padding: 92px 0 24px; }
+  .heroBrowser { grid-column: 1; grid-row: 1; margin: 0; }
+  .heroPhone { display: none; }
+  .heroState { grid-column: 1; grid-row: 2; position: relative; inset: auto; justify-self: center; padding: 12px 16px; box-shadow: none; }
+  .heroLabel { grid-column: 1; grid-row: 3; margin: 0; justify-content: center; }
+  .heroOrbit { inset: 60px -8px 64px; border-radius: 28px; transform: rotate(-3deg); }
+  .mascot { width: 112px; right: 22px; }
+  .serviceStrip { margin-top: 0; padding-top: 12px; }
+}
+@media (min-width: 900px) and (max-width: 1079px) {
+  .heroInner { grid-template-columns: .95fr 1.05fr; gap: 32px; }
+  .heroCopy { text-align: left; }
+  .heroCopy :global(.btn-row), .heroFacts { justify-content: flex-start; }
+  .heroCopy h1 { font-size: 3rem; }
+  .heroCopy :global(.btn-row) { gap: 8px; }
+  .heroCopy :global(.btn) { padding-inline: 14px; font-size: .9rem; }
+}
+@media (max-width: 600px) {
+  .hero { padding-top: 28px; }
+  .heroCopy { text-align: center; margin-inline: auto; }
+  .heroCopy h1 { font-size: clamp(2.15rem, 10vw, 3.2rem); }
+  .kicker { font-size: .75rem; margin-bottom: 16px; }
+  .heroCopy :global(.lead) { font-size: 1rem; margin-block: 16px 22px; }
+  .heroCopy :global(.btn-row) { display: grid; grid-template-columns: 1fr; gap: 2px; }
+  .heroCopy :global(.btn) { min-height: 48px; }
+  .heroFacts { justify-content: center; margin-top: 14px; gap: 8px; font-size: .7rem; }
+  .heroVisual { padding-top: 74px; gap: 12px; }
+  .mascot { width: 92px; right: 18px; }
+  .heroState { width: 100%; justify-content: center; padding: 10px 12px; }
+  .heroState > span { display: grid; }
+  .heroState strong { font-size: .8rem; }
+  .heroState small { font-size: .7rem; }
+  .heroOrbit { inset: 48px -6px 45px; }
+  .serviceStrip > div { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; gap: 8px; padding-bottom: 8px; scroll-snap-type: x proximity; }
+  .serviceStrip a { flex: none; padding: 8px 12px; border: 1px solid var(--border); border-radius: 100px; background: white; scroll-snap-align: start; }
+  .audiences { padding-top: 0; }
+  .audiences > a { padding: 20px 4px; gap: 12px; }
+  .audiences strong { font-size: .88rem; }
+  .audiences small { font-size: .75rem; }
+  .industryHeading { gap: 20px; margin-bottom: 24px; }
+  .neighborhood { max-height: 220px; object-fit: cover; }
+}

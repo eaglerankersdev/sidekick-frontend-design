@@ -93,3 +93,10 @@
 .roleDots[data-n="3"] b:nth-child(-n + 3) {
   background: var(--cobalt);
 }
+
+@media (max-width: 600px) {
+  .roles { padding: 12px; }
+  .roleRow { grid-template-columns: 1fr auto; gap: 6px 12px; padding: 14px 12px; }
+  .roleRow > span { grid-column: 1; grid-row: 2; }
+  .roleDots { grid-column: 2; grid-row: 1 / 3; }
+}

@@ -72,9 +72,9 @@ export function Phone({ children, className = "" }: { children: React.ReactNode;
 }
 
 /* ---------- Dashboard ---------- */
-export function DashboardMock({ compact = false, brand = "Workspace" }: { compact?: boolean; brand?: string }) {
+export function DashboardMock({ compact = false, brand = "Workspace", mobilePreview = false }: { compact?: boolean; brand?: string; mobilePreview?: boolean }) {
   return (
-    <div className={`${s.app} ${compact ? s.appCompact : ""}`}>
+    <div className={`${s.app} ${compact ? s.appCompact : ""} ${mobilePreview ? s.mobilePreview : ""}`}>
       <aside className={s.side}>
         <div className={s.sideBrand}>
           <span className={s.sideLogo}>{brand.charAt(0)}</span>

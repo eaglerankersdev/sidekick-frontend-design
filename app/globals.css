@@ -603,3 +603,18 @@ html.motion-ok [data-reveal-stagger] > .is-in:not([style*="opacity"]) {
 .eyebrow { flex-wrap: wrap; }
 .btn { max-width: 100%; white-space: normal; text-align: center; }
 @media (max-width: 600px) { :root { --header-h: 72px; } }
+
+/* Comfortable touch rhythm without changing desktop typography or spacing. */
+@media (max-width: 600px) {
+  :root { --section-y: 48px; --gutter: 20px; }
+  .section-head { margin-bottom: 28px; }
+  .section-head p { font-size: 1rem; }
+  .section-head h2 { font-size: clamp(1.85rem, 7.8vw, 2.4rem); line-height: 1.15; }
+  .section--tight { padding-block: 40px; }
+  .split { gap: 28px; }
+  input, select, textarea { font-size: 16px; }
+  html.motion-ok [data-reveal], html.motion-ok [data-reveal-stagger] > * { transform: translate3d(0, 10px, 0); }
+  html.motion-ok [data-reveal="fade"] { transform: none; }
+  html.motion-ok [data-reveal].is-in:not([style*="opacity"]),
+  html.motion-ok [data-reveal-stagger] > .is-in:not([style*="opacity"]) { transform: none; }
+}

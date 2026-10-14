@@ -122,7 +122,7 @@ export function WorkflowJourney() {
         {steps.map((st, i) => {
           const Icon = st.icon;
           return (
-            <div key={st.key} className={`${s.step} ${active === i ? s.stepActive : ""}`}>
+            <div key={st.key} data-touch-reveal className={`${s.step} ${active === i ? s.stepActive : ""}`}>
               <span className={s.stepIcon}>
                 <Icon aria-hidden />
               </span>

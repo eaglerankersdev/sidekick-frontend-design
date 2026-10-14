@@ -14,7 +14,7 @@ export function HeroField() {
 
   useEffect(() => {
     const canvas = ref.current;
-    if (!canvas || prefersReducedMotion()) return;
+    if (!canvas || prefersReducedMotion() || window.matchMedia("(max-width: 1079px)").matches) return;
 
     let disposed = false;
     let cleanup = () => {};

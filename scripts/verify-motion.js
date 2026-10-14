@@ -11,10 +11,10 @@ async page => {
   check(columns === 4, 'Feature cards exceed their four-column layout');
   for (const slug of ['pressure-washing', 'concrete-sealing', 'towing', 'junk-removal', 'painting']) {
     await page.goto(base + '/industries/' + slug);
-    const panels = page.locator('[class*="__stack"]').first().locator(':scope > *');
+    const panels = page.locator('[class*="_stack"]').first().locator(':scope > *');
     const first = await panels.nth(0).boundingBox(), second = await panels.nth(1).boundingBox();
     check(first.y + first.height <= second.y || first.x + first.width <= second.x, slug + ': hero previews overlap');
-    const kpis = page.locator('aside [class*="__kpis"]').last();
+    const kpis = page.locator('aside [class*="_kpis"]').last();
     check(await kpis.evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length) === 2, slug + ': narrow dashboard did not adapt to its container');
   }
   await page.setViewportSize({width: 390, height: 844});

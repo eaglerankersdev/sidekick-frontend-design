@@ -37,7 +37,7 @@ export function MotionProvider() {
           once: true,
           onEnter: () => gsap.to(el, {
             opacity: 1, y: 0, scale: 1,
-            duration: 0.55, ease: "power3.out", delay,
+            duration: desktop ? 0.55 : 0.38, ease: "power3.out", delay,
             onStart: () => el.classList.add("is-in"),
             clearProps: "transform,opacity",
           }),
@@ -48,6 +48,12 @@ export function MotionProvider() {
       gsap.utils.toArray<HTMLElement>("[data-reveal-stagger]").forEach(group => {
         Array.from(group.children).forEach((el, index) => reveal(el as HTMLElement, desktop ? (index % 4) * 0.05 : 0));
       });
+      if (!desktop) {
+        gsap.utils.toArray<HTMLElement>("[data-touch-reveal]").forEach(el => {
+          gsap.from(el, { y: 12, opacity: 0, duration: 0.4, ease: "power2.out",
+            scrollTrigger: { trigger: el, start: "top 95%", once: true }, clearProps: "transform,opacity" });
+        });
+      }
       gsap.utils.toArray<HTMLElement>("[data-story-step]").forEach(el => {
         ScrollTrigger.create({ trigger: el, start: "top 65%", end: "bottom 35%", toggleClass: "is-current" });
       });

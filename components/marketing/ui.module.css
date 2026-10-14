@@ -301,3 +301,31 @@
   .sectionIndex { width: 36px; height: 36px; font-size: .78rem; box-shadow: 0 0 0 5px var(--white); }
   .sectionTitleRow h3 { font-size: 1.2rem; }
 }
+
+@media (max-width: 1079px) {
+  .heroSplit .heroInner { grid-template-columns: 1fr; gap: 32px; }
+  .heroVisual { width: 100%; max-width: 680px; margin-inline: auto; }
+  .heroCopy { max-width: 680px; }
+}
+@media (max-width: 600px) {
+  .hero { padding-block: 32px; }
+  .heroWithCrumbs { padding-top: 20px; }
+  .heroCrumbs { margin-bottom: 24px; }
+  .heroTitle { font-size: clamp(2rem, 8.8vw, 2.75rem); line-height: 1.12; }
+  .heroIntro { font-size: 1rem; line-height: 1.65; margin-top: 16px; }
+  .heroActions { margin-top: 24px; display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .heroActions > :global(.btn) { width: 100%; }
+  .heroActions > :global(.status) { justify-self: start; width: auto; }
+  .cta { padding-block: 32px; }
+  .ctaCard { padding: 36px 20px; border-radius: 22px; }
+  .ctaCard h2 { font-size: 1.85rem; line-height: 1.18; }
+  .ctaCard p { font-size: 1rem; margin-block: 16px 24px; }
+  .ctaCard :global(.btn-row) { display: grid; grid-template-columns: 1fr; }
+}
+
+
+@media (min-width: 601px) and (max-width: 1079px) {
+  .heroSplit .heroCopy { margin-inline: auto; text-align: center; }
+  .heroSplit .heroIntro { margin-inline: auto; }
+  .heroSplit .heroActions { justify-content: center; }
+}

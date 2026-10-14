@@ -1210,3 +1210,12 @@
   .colHead { grid-column: 1 / -1; }
   .bCard svg { flex: none; }
 }
+
+/* A focused preview, rather than a miniature desktop app, in the mobile hero. */
+@media (max-width: 600px) {
+  .mobilePreview .topbar { display: none; }
+  .mobilePreview .kpi:nth-child(2), .mobilePreview .kpi:nth-child(4),
+  .mobilePreview .row:nth-child(n + 4) { display: none; }
+  .mobilePreview .main { padding: 12px; }
+  .mobilePreview .row { min-height: 44px; }
+}

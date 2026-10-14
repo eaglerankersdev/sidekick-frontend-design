@@ -45,7 +45,7 @@ export default function HomePage() {
             <div className={s.heroOrbit} aria-hidden />
             <div className={s.heroBrowser}>
               <HeroMascot className={s.mascot} />
-              <Browser url="Your SideKick workspace"><DashboardMock /></Browser>
+              <Browser url="Your SideKick workspace"><DashboardMock mobilePreview /></Browser>
             </div>
             <div className={s.heroPhone}><Phone><JobPhoneMock /></Phone></div>
             <div className={s.heroState}><span><CalendarCheck aria-hidden /></span><div><strong>Next stop: a job well done.</strong><small>From request to scheduled work</small></div></div>
