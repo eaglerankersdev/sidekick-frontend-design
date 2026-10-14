@@ -225,3 +225,16 @@
   .recordTitle { margin: 8px 0; }
   .record dl > div { padding: 7px 0; font-size: .74rem; }
 }
+
+/* Use the available screen height instead of leaving a short card at the top.
+   svh keeps browser-toolbar changes from stretching the story during a swipe. */
+@media (max-width: 959px) {
+  .journey[data-mobile-scroll] .step {
+    min-height: calc(100svh - var(--header-h) - 104px);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .journey[data-mobile-scroll] .inlineVisual { display: grid; }
+  .journey[data-mobile-scroll] .record { display: flex; flex-direction: column; }
+  .journey[data-mobile-scroll] .record dl { flex: 1; display: grid; grid-template-rows: repeat(3, 1fr); }
+  .journey[data-mobile-scroll] .record dl > div { align-items: center; }
+}
