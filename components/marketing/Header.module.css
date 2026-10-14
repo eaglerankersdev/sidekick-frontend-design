@@ -54,10 +54,3 @@
 
 html:has(.sheet[open]) { scrollbar-gutter: auto; }
 @media (max-width: 600px) { .sheet { width: 100vw; max-width: 100vw; } }
-
-@media (max-width: 600px) {
-  /* Reserve a 48px companion slot plus touch spacing before the menu. */
-  .bar { gap: 8px; }
-  .actions { padding-left: 56px; }
-  .demo { display: none; }
-}

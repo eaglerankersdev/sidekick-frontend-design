@@ -13,7 +13,6 @@ export function SideKickPet() {
   const drag = useRef<{ id: number; x: number; y: number; startX: number; startY: number } | null>(null);
   const dragged = useRef(false);
   const moved = useRef(false);
-  const [docked, setDocked] = useState(false);
   const [dragging, setDragging] = useState(false);
   const reactionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [ready, setReady] = useState(false);
@@ -70,9 +69,8 @@ export function SideKickPet() {
     const resize = () => {
       const size = root.current?.offsetWidth ?? 100;
       const mobile = matchMedia("(max-width: 600px)").matches;
-      setDocked(mobile && !moved.current);
       if (moved.current && position.current) place(position.current.x, position.current.y);
-      else place(mobile ? innerWidth - 120 : innerWidth - size - 16, mobile ? 12 : innerHeight - size - 80);
+      else place(innerWidth - size - (mobile ? 8 : 16), innerHeight - size - (mobile ? 8 : 80));
     };
     resize();
     window.addEventListener("resize", resize);
@@ -100,7 +98,6 @@ export function SideKickPet() {
       data-pose={currentPose}
       data-still={paused || reduced}
       data-dragging={dragging}
-      data-docked={docked}
       hidden={obstructed}
       onKeyDown={event => { if (event.key === "Escape") dismiss(); }}
     >
@@ -119,7 +116,7 @@ export function SideKickPet() {
           const start = drag.current;
           if (!start || start.id !== event.pointerId) return;
           const dx = event.clientX - start.x, dy = event.clientY - start.y;
-          if (Math.hypot(dx, dy) > 4) { dragged.current = true; moved.current = true; setDocked(false); setDragging(true); setReaction(null); }
+          if (Math.hypot(dx, dy) > 4) { dragged.current = true; moved.current = true; setDragging(true); setReaction(null); }
           if (dragged.current) place(start.startX + dx, start.startY + dy);
         }}
         onPointerUp={event => {
@@ -135,7 +132,6 @@ export function SideKickPet() {
           if (!step || !position.current) return;
           event.preventDefault();
           moved.current = true;
-          setDocked(false);
           const distance = event.shiftKey ? 50 : 20;
           place(position.current.x + step[0] * distance, position.current.y + step[1] * distance);
         }}

@@ -1,7 +1,6 @@
 // Playwright callback; run against the local production server.
 async page => {
   const base = 'http://127.0.0.1:3000';
-  const overlap = (a, b) => a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
   for (const width of [320, 375, 390, 440, 600, 768, 1440]) {
     await page.setViewportSize({width, height: width === 320 ? 568 : 667});
     await page.goto(base);
@@ -9,13 +8,11 @@ async page => {
     await pet.waitFor();
     const bounds = await pet.boundingBox();
     if (width <= 600) {
-      const header = await page.locator('header').boundingBox();
-      const menu = await page.getByRole('button', {name: 'Open menu', exact: true}).boundingBox();
-      const logo = await page.locator('header a').first().boundingBox();
-      if (bounds.width !== 48 || bounds.y + bounds.height > header.y + header.height || overlap(bounds, menu) || overlap(bounds, logo)) throw Error(`Obstructed navbar at ${width}`);
+      const height = width === 320 ? 568 : 667;
+      if (bounds.width !== 60 || Math.abs(bounds.x - (width - 68)) > 1 || Math.abs(bounds.y - (height - 68)) > 1) throw Error(`Incorrect mobile corner at ${width}`);
       await page.evaluate(() => window.scrollTo(0, 800));
       const scrolled = await pet.boundingBox();
-      if (scrolled.y !== bounds.y) throw Error(`Pet left safe navbar slot at ${width}`);
+      if (scrolled.y !== bounds.y) throw Error(`Pet moved while scrolling at ${width}`);
       await page.mouse.move(scrolled.x + 24, scrolled.y + 24);
       await page.mouse.down();
       await page.mouse.move(100, 300, {steps: 10});

@@ -132,18 +132,13 @@
 
 @keyframes frames { from { background-position-x: 0; } to { background-position-x: 133.333333%; } }
 
-@media (max-width: 600px) { .pet { --pet-size: 80px; } }
 @media (prefers-reduced-motion: reduce) {
   .pet *, .pet *::before, .pet *::after { animation: none !important; transition: none !important; }
 }
 @media print { .pet { display: none; } }
 
-/* A reserved navbar slot keeps the companion off mobile page content. */
+/* Mobile companion rests at the lower-right edge until dragged. */
 @media (max-width: 600px) {
-  .pet { --pet-size: 48px; z-index: 101; transform: translate(calc(100vw - 120px), 12px); }
-  .pet[data-docked="true"] .controls { bottom: auto; top: calc(100% + 8px); left: auto; right: 0; }
-  .pet[data-docked="true"] .greeting { top: calc(100% + 4px); left: auto; right: 0; }
-  .pet[data-docked="true"]:has(.greeting) .controls { top: calc(100% + 36px); }
+  .pet { --pet-size: 60px; transform: translate(calc(100vw - var(--pet-size) - 8px), calc(100dvh - var(--pet-size) - 8px)); }
   .controls { left: auto; right: 0; }
-  .pet[data-docked="true"] .bounce { animation: none; }
 }
