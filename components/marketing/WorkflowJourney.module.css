@@ -170,3 +170,58 @@
   .step h3 { font-size: 1.2rem; }
   .step p { font-size: .9rem; line-height: 1.6; }
 }
+
+/* The wrapper is layout-neutral on desktop; motion is an enhancement to the list. */
+.mobileViewport { min-width: 0; }
+.mobileProgress, .mobileMeter { display: none; }
+@media (max-width: 959px) {
+  .journey[data-mobile-scroll] { display: block; position: relative; }
+  .journey[data-mobile-scroll] .mobileViewport {
+    position: sticky;
+    top: calc(var(--header-h) + 12px);
+    overflow: clip;
+    padding-bottom: 12px;
+  }
+  .journey[data-mobile-scroll] .mobileProgress {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px; color: var(--muted-strong); font-size: .75rem;
+    font-weight: 600; font-variant-numeric: tabular-nums;
+  }
+  .journey[data-mobile-scroll] .steps {
+    display: flex; gap: 16px; align-items: stretch; will-change: transform;
+  }
+  .journey[data-mobile-scroll] .step {
+    flex: 0 0 100%; min-width: 0; align-content: start;
+    grid-template-columns: 36px minmax(0, 1fr); gap: 10px;
+    padding: 16px; border-radius: 20px; transition: none;
+  }
+  .journey[data-mobile-scroll] .stepIcon { width: 36px; height: 36px; border-radius: 10px; }
+  .journey[data-mobile-scroll] .step h3 { margin: 0 0 4px; font-size: 1.15rem; }
+  .journey[data-mobile-scroll] .step p { font-size: .875rem; line-height: 1.5; }
+  .journey[data-mobile-scroll] .inlineVisual { margin-top: 4px; }
+  .journey[data-mobile-scroll] .mobileMeter {
+    display: block; height: 2px; margin-top: 14px; background: var(--border); overflow: hidden;
+  }
+  .mobileMeter span { display: block; height: 100%; background: var(--cobalt); transform-origin: left; transition: transform .2s ease; }
+}
+
+.record { padding: 16px; border-radius: 14px; background: var(--canvas); border: 1px solid var(--border); }
+.recordHeader { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: .7rem; color: var(--muted-strong); }
+.recordStatus { padding: 3px 7px; border-radius: 6px; background: var(--ice); color: var(--navy); font-weight: 700; }
+.recordTitle { display: block; margin: 12px 0; font-size: .95rem; line-height: 1.4; }
+.record dl { margin: 0; }
+.record dl > div { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px solid var(--border); font-size: .78rem; line-height: 1.4; }
+.record dt { color: var(--muted-strong); }
+.record dd { margin: 0; text-align: right; font-weight: 600; }
+.step .recordFoot { margin: 10px 0 0; font-size: .7rem; color: var(--muted-strong); }
+@media (min-width: 601px) and (max-width: 959px) {
+  .journey { max-width: 520px; margin-inline: auto; }
+}
+@media (max-width: 360px) {
+  .journey[data-mobile-scroll] .step { padding: 12px; gap: 8px; }
+  .journey[data-mobile-scroll] .step p { font-size: .8rem; }
+  .record { padding: 12px; }
+  .recordHeader, .step .recordFoot { font-size: .65rem; }
+  .recordTitle { margin: 8px 0; }
+  .record dl > div { padding: 7px 0; font-size: .74rem; }
+}
