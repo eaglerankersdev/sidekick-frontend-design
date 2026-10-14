@@ -23,6 +23,7 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const header = useRef<HTMLElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
+  const closeButton = useRef<HTMLButtonElement>(null);
   const triggers = useRef<Record<string, HTMLButtonElement | null>>({});
   const burger = useRef<HTMLButtonElement>(null);
   const previousPath = useRef(pathname);
@@ -62,6 +63,7 @@ export function Header() {
     }
     setOpen(null);
     sheet.showModal();
+    closeButton.current?.focus({ preventScroll: true });
     const previous = document.documentElement.style.overflow;
     document.documentElement.style.overflow = "hidden";
     const desktop = window.matchMedia("(min-width: 1080px)");
@@ -132,7 +134,7 @@ export function Header() {
         onCancel={() => setMobileOpen(false)} onClose={() => { setMobileOpen(false); burger.current?.focus(); }}
         onClick={(e) => { if (e.target === e.currentTarget) setMobileOpen(false); }}>
         <div className={s.sheetContent}>
-          <div className={s.sheetTop}><HomeLink onClick={() => setMobileOpen(false)} aria-label="SideKick CRM home"><Image src="/brand/sidekick-crm-logo.png" alt="SideKick CRM" width={2048} height={778} sizes="154px" /></HomeLink><button type="button" className={s.burger} aria-label="Close menu" onClick={() => setMobileOpen(false)}><X aria-hidden /></button></div>
+          <div className={s.sheetTop}><HomeLink onClick={() => setMobileOpen(false)} aria-label="SideKick CRM home"><Image src="/brand/sidekick-crm-logo.png" alt="SideKick CRM" width={2048} height={778} sizes="154px" /></HomeLink><button ref={closeButton} autoFocus type="button" className={s.burger} aria-label="Close menu" onClick={() => setMobileOpen(false)}><X aria-hidden /></button></div>
           <nav aria-label="Mobile" className={s.sheetNav}>
             {menus.map((menu) => <details key={menu.key} className={s.acc} name="mobile-navigation">
               <summary>{menu.label}<ChevronDown aria-hidden /></summary>

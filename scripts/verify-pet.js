@@ -4,6 +4,7 @@ async page => {
   await page.goto('http://127.0.0.1:3000/');
   const character=page.getByRole('button',{name:'Say hello to SideKick',exact:true});
   await character.waitFor();
+  if(await page.getByRole('button', {name: /^(Pause|Resume) SideKick$/}).count()) throw Error('Removed playback control remains');
   const start=await character.boundingBox();
   if(start.x < 1200) throw Error('Pet does not start on the right');
   await page.waitForTimeout(8000); // Exceed the former automatic walking interval.

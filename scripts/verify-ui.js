@@ -57,6 +57,7 @@ async (page) => {
   await page.getByRole('button', {name: 'Open menu', exact: true}).click();
   const sheet = page.getByRole('dialog', {name: 'Navigation menu'});
   check(await sheet.isVisible(), 'Mobile dialog did not open');
+  check(await sheet.getByRole('button', {name: 'Close menu', exact: true}).evaluate(el => document.activeElement === el), 'Menu must focus close button rather than framing the logo');
   const sheetBounds = await sheet.boundingBox();
   check(Math.abs(sheetBounds.x) < 1 && Math.abs(sheetBounds.width - 390) < 1 && Math.abs(sheetBounds.height - 844) < 1, 'Mobile drawer does not fill viewport');
   const summary = sheet.locator('summary').first();

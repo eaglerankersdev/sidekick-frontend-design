@@ -54,3 +54,6 @@
 
 html:has(.sheet[open]) { scrollbar-gutter: auto; }
 @media (max-width: 600px) { .sheet { width: 100vw; max-width: 100vw; } }
+
+/* Avoid rectangular touch flashes; :focus-visible still marks keyboard focus. */
+.burger, .sheet a, .sheet button, .sheet summary { -webkit-tap-highlight-color: transparent; }

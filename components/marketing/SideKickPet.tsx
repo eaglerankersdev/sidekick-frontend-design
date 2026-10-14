@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Pause, Play, X } from "lucide-react";
+import { X } from "lucide-react";
 import styles from "./SideKickPet.module.css";
 
 type Pose = "idle" | "wave";
@@ -17,7 +17,6 @@ export function SideKickPet() {
   const reactionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [ready, setReady] = useState(false);
   const [dismissed, setDismissed] = useState(false);
-  const [paused, setPaused] = useState(false);
   const [reduced, setReduced] = useState(true);
   const [obstructed, setObstructed] = useState(false);
   const [reaction, setReaction] = useState<Pose | null>(null);
@@ -96,7 +95,7 @@ export function SideKickPet() {
       ref={root}
       className={styles.pet}
       data-pose={currentPose}
-      data-still={paused || reduced}
+      data-still={reduced}
       data-dragging={dragging}
       hidden={obstructed}
       onKeyDown={event => { if (event.key === "Escape") dismiss(); }}
@@ -147,12 +146,6 @@ export function SideKickPet() {
         {reaction === "wave" && <span className={styles.greeting} role="status">Hi!</span>}
       </button>
       <div className={styles.controls} role="group" aria-label="SideKick companion controls">
-        <button type="button" aria-label={paused ? "Resume SideKick" : "Pause SideKick"} title={paused ? "Resume SideKick" : "Pause SideKick"} onClick={() => {
-          setPaused(value => !value);
-          setReaction(null);
-        }}>
-          {paused ? <Play size={15} /> : <Pause size={15} />}
-        </button>
         <button type="button" aria-label="Hide SideKick for this visit" title="Hide for this visit" onClick={dismiss}>
           <X size={16} />
         </button>
