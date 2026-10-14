@@ -329,3 +329,13 @@
   .heroSplit .heroIntro { margin-inline: auto; }
   .heroSplit .heroActions { justify-content: center; }
 }
+
+/* Let actions follow the preview naturally, including below short viewports. */
+.heroText { display: contents; }
+@media (max-width: 600px) {
+  .heroSplit .heroInner { gap: 24px; }
+  .heroSplit .heroCopy { display: contents; }
+  .heroSplit .heroText { display: block; grid-row: 1; }
+  .heroSplit .heroVisual { grid-row: 2; }
+  .heroSplit .heroActions { grid-row: 3; margin-top: 0; width: 100%; }
+}

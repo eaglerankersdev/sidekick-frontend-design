@@ -38,6 +38,7 @@ export function PageHero({
       {breadcrumbs && <div className={`container ${styles.heroCrumbs}`}><Breadcrumbs items={breadcrumbs} /></div>}
       <div className={`container ${styles.heroInner} ${align === "center" ? styles.heroCenter : ""}`}>
         <div className={styles.heroCopy}>
+          <div className={styles.heroText}>
           {eyebrow && <span className="eyebrow">{eyebrow}</span>}
           <h1 className={styles.heroTitle}>
             {title} {accent && <span className="grad-text">{accent}</span>}
@@ -45,6 +46,7 @@ export function PageHero({
           <p className={styles.heroIntro}>
             {intro}
           </p>
+          </div>
           {actions && (
             <div className={`btn-row ${styles.heroActions}`}>
               {actions}
