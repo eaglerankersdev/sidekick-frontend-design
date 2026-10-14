@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Users, ShieldCheck, Sparkles, Globe, FileSignature, Check, Layers3, BriefcaseBusiness, Palette, Play, CalendarCheck, Inbox } from "lucide-react";
+import { ArrowRight, Users, ShieldCheck, Sparkles, Globe, FileSignature, Check, BriefcaseBusiness, Palette, Play, CalendarCheck, Inbox } from "lucide-react";
 import { MCPConnections } from "@/components/marketing/MCPConnections";
 import { HeroField } from "@/components/marketing/HeroField";
 import { HeroMascot } from "@/components/marketing/HeroMascot";
@@ -29,7 +29,7 @@ export default function HomePage() {
         <div className={`container ${s.heroInner}`}>
           <div className={s.heroCopy}>
             <div className={s.heroIntro}>
-            <span className={s.kicker}><Layers3 aria-hidden /> Built for service businesses</span>
+            <span className={s.kicker}>Less admin. More jobs done.</span>
             <h1>Your business.<br /><span>Your SideKick.</span></h1>
             <p className="lead">From the first service request to the paid invoice. Bring your leads, quotes, jobs and team together in one connected CRM.</p>
             </div>
