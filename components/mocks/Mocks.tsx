@@ -1,3 +1,4 @@
+import { TowTruck } from "@/components/marketing/NavIcon";
 /**
  * Product UI mockups rendered in HTML/CSS so they stay crisp at any size.
  * All data shown is SAMPLE data and every mock is labelled as a preview.
@@ -23,7 +24,6 @@ import {
   Check,
   Pencil,
   X,
-  Truck,
   Wifi,
   BatteryFull,
   Signal,
@@ -305,7 +305,7 @@ export function DispatchMock() {
             <div key={card} className={s.bCard}>
               <strong>{card}</strong>
               <span>
-                <Truck /> Truck 2 · Driver J.
+                <TowTruck /> Truck 2 · Driver J.
               </span>
             </div>
           ))}
