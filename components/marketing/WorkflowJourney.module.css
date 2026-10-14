@@ -238,3 +238,36 @@
   .journey[data-mobile-scroll] .record dl { flex: 1; display: grid; grid-template-rows: repeat(3, 1fr); }
   .journey[data-mobile-scroll] .record dl > div { align-items: center; }
 }
+
+/* Readable type for the expanded touch-screen cards. */
+@media (max-width: 959px) {
+  .journey .step h3 { font-size: 1.35rem; }
+  .journey .step p { font-size: 1rem; }
+  .journey[data-mobile-scroll] .step h3 { font-size: 1.35rem; }
+  .journey[data-mobile-scroll] .step p { font-size: 1rem; }
+  .journey .stepIndex, .journey .recordHeader { font-size: .8rem; }
+  .journey .recordTitle { font-size: 1.125rem; }
+  .journey .record dl > div { font-size: .95rem; }
+  .journey .step .recordFoot { font-size: .85rem; }
+  .journey[data-mobile-scroll] .step .recordFoot { font-size: .85rem; }
+  .journey[data-mobile-scroll] .mobileProgress { font-size: .85rem; }
+}
+@media (max-width: 360px) {
+  .journey .step h3, .journey[data-mobile-scroll] .step h3 { font-size: 1.25rem; }
+  .journey .step p, .journey[data-mobile-scroll] .step p { font-size: .875rem; }
+  .journey .recordTitle { font-size: 1rem; }
+  .journey .record dl > div { font-size: .8125rem; }
+  .journey .stepIndex, .journey .recordHeader,
+  .journey .step .recordFoot, .journey[data-mobile-scroll] .step .recordFoot { font-size: .75rem; }
+}
+@media (max-width: 360px) {
+  .journey[data-mobile-scroll] .step { padding: 10px; grid-template-columns: 28px minmax(0, 1fr); gap: 8px; }
+  .journey[data-mobile-scroll] .stepIcon { width: 28px; height: 28px; }
+  .journey[data-mobile-scroll] .record { padding: 10px; }
+  .journey .record dl > div { gap: 6px; }
+}
+@media (max-width: 360px) {
+  .journey[data-mobile-scroll] .mobileViewport { padding-bottom: 8px; }
+  .journey[data-mobile-scroll] .mobileProgress { margin-bottom: 8px; }
+  .journey[data-mobile-scroll] .mobileMeter { margin-top: 8px; }
+}
