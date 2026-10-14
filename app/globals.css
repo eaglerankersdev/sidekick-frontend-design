@@ -618,3 +618,12 @@ html.motion-ok [data-reveal-stagger] > .is-in:not([style*="opacity"]) {
   html.motion-ok [data-reveal].is-in:not([style*="opacity"]),
   html.motion-ok [data-reveal-stagger] > .is-in:not([style*="opacity"]) { transform: none; }
 }
+
+/* Touch/click focus can be transferred by dialogs and route handlers.
+   Keep keyboard :focus-visible styles, without automatic pointer outlines. */
+:is(a, button, summary, [role="button"], [role="tab"]) {
+  -webkit-tap-highlight-color: transparent;
+}
+html[data-input-mode="pointer"] :is(a, button, summary, [role="button"], [role="tab"]):focus {
+  outline: none;
+}

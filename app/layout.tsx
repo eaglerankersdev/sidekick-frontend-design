@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/marketing/Header";
 import { Footer } from "@/components/marketing/Footer";
 import { MotionProvider } from "@/lib/motion";
+import { FocusModality } from "@/lib/focus-modality";
 import { SideKickPet } from "@/components/marketing/SideKickPet";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sidekickcrm.example";
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Header />
         <main id="main">{children}</main>
         <Footer />
+        <FocusModality />
         <MotionProvider />
         <SideKickPet />
       </body>
