@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Check, Sparkles, Users, FileText, Briefcase, CalendarDays, Receipt, BarChart3, Inbox } from "lucide-react";
+import { ArrowRight, Check, Users, FileText, Briefcase, CalendarDays, Receipt, BarChart3, Inbox } from "lucide-react";
 import { PageHero, CTASection, FeatureStatusBadge } from "@/components/marketing/ui";
 import { IndustrySwitcher } from "@/components/marketing/IndustrySwitcher";
 import { industries } from "@/content/industries";
@@ -61,8 +61,8 @@ export default function IndustriesPage() {
               </Link>
             ))}
             <div className={`card ${s.card} ${s.cardOther}`}>
-              <div className={s.cardArt} aria-hidden>
-                <Sparkles />
+              <div className={s.cardPhoto} aria-hidden>
+                <Image src="/images/industries/other-services.svg" alt="" width={800} height={500} sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 400px" />
               </div>
               <h3>
                 Other services <FeatureStatusBadge feature="aiOnboarding" />
