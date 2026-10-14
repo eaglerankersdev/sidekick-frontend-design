@@ -26,6 +26,7 @@ async page => {
   if (await outlined(product)) throw Error('Clicked desktop navigation has outline');
   await page.keyboard.press('ArrowDown');
   const first = page.locator('#nav-product a').first();
+  await page.waitForFunction(() => document.activeElement === document.querySelector('#nav-product a'));
   if (!await outlined(first)) throw Error('Keyboard submenu focus lost');
   await page.keyboard.press('Escape');
   const cta = page.locator('main a[href="/contact"]').first();

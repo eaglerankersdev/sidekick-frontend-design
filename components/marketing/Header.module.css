@@ -49,7 +49,7 @@
 .sheetSecondary a { padding-block: 10px; }
 .sheetActions { display: grid; gap: 12px; margin-top: auto; padding-top: 32px; }
 .sheetActions p { text-align: center; font-size: .8rem; color: var(--muted-strong); }
-@media (min-width: 440px) { .demo { display: inline-flex; } }
+@media (min-width: 1080px) { .demo { display: inline-flex; } }
 @media (min-width: 1080px) { .nav { display: flex; } .login { display: inline-flex; } .burger { display: none; } }
 
 html:has(.sheet[open]) { scrollbar-gutter: auto; }

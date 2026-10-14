@@ -602,7 +602,7 @@ html.motion-ok [data-reveal-stagger] > .is-in:not([style*="opacity"]) {
 .status--pending-review { color: var(--plan); background: var(--plan-bg); }
 .eyebrow { flex-wrap: wrap; }
 .btn { max-width: 100%; white-space: normal; text-align: center; }
-@media (max-width: 600px) { :root { --header-h: 72px; } }
+@media (max-width: 600px) { :root { --header-h: 88px; } }
 
 /* Comfortable touch rhythm without changing desktop typography or spacing. */
 @media (max-width: 600px) {
