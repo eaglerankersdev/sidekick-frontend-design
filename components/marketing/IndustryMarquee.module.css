@@ -1,15 +1,6 @@
-.section { padding: 26px 0 32px; overflow: hidden; background: var(--ice); border-block: 1px solid var(--border); }
-.heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
-.heading p { display: flex; align-items: center; gap: 10px; margin: 0; font-size: .8rem; font-weight: 600; color: var(--muted-strong); }
-.dot { width: 5px; height: 5px; background: var(--cobalt); border-radius: 50%; }
-.controls { display: flex; align-items: center; gap: 16px; }
-.controls a { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: var(--navy); font-size: .8rem; font-weight: 700; }
-.controls a:hover { color: var(--cobalt); }
-.controls a svg { width: 16px; height: 16px; }
-.toggle { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--border); border-radius: 50%; background: white; color: var(--navy); cursor: pointer; transition: background .2s, color .2s; }
-.toggle:hover { background: var(--navy); color: white; }
-.toggle svg { width: 15px; height: 15px; }
-.controls :focus-visible { outline: 2px solid var(--cobalt); outline-offset: 4px; }
+.section { position: relative; padding: 22px 0; overflow: hidden; background: var(--ice); border-block: 1px solid var(--border); }
+.motionControl { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.motionControl:focus-visible { z-index: 2; top: 4px; left: 20px; width: auto; height: 44px; padding: 8px 16px; clip-path: none; background: white; color: var(--navy); border: 1px solid var(--cobalt); border-radius: 8px; }
 .window { overflow: hidden; mask-image: linear-gradient(90deg, transparent, black 5%, black 95%, transparent); }
 .track { display: flex; width: max-content; animation: travel 42s linear infinite; }
 .group { display: flex; align-items: center; justify-content: space-around; flex: none; min-width: 100vw; margin: 0; padding: 0; list-style: none; }
@@ -21,19 +12,14 @@
 @media (hover: hover) { .section:hover .track { animation-play-state: paused; } }
 @keyframes travel { to { transform: translateX(-50%); } }
 @media (max-width: 600px) {
-  .section { padding: 16px 0 22px; }
-  .heading { gap: 8px; margin-bottom: 10px; }
-  .heading p { max-width: 150px; font-size: .75rem; }
-  .dot { display: none; }
-  .controls { gap: 8px; }
-  .controls a { font-size: .75rem; }
+  .section { padding: 16px 0; }
   .group li { gap: 10px; padding-left: 22px; font-size: 1.2rem; }
   .separator { margin-left: 12px; }
   .icon { width: 38px; height: 38px; border-radius: 12px; }
   .icon svg { width: 21px; height: 21px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .toggle { flex: none; display: none; }
+  .motionControl { display: none; }
   .window { mask-image: none; }
   .track { animation: none; width: 100%; }
   .group { min-width: 0; width: 100%; flex-wrap: wrap; justify-content: center; gap: 12px 20px; padding-inline: 20px; }
