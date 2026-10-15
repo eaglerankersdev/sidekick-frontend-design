@@ -77,13 +77,16 @@ html:has(.sheet[open]) { scrollbar-gutter: auto; }
   transition: width .38s var(--ease-out), transform .38s var(--ease-out), border-radius .38s var(--ease-out), box-shadow .38s var(--ease-out), border-color .2s;
 }
 .header[data-scrolled="true"] {
-  width: calc(100% - clamp(32px, 6vw, 96px));
+  width: min(calc(100% - clamp(32px, 6vw, 96px)), calc(var(--maxw) + 48px));
   transform: translateY(12px);
   border-radius: 999px;
   border-bottom-color: transparent;
   box-shadow: 0 8px 28px -10px rgb(0 32 82 / .22);
 }
 .header[data-scrolled="true"] .demo { border-radius: 999px; }
+@media (min-width: 1080px) {
+  .header[data-scrolled="true"] .bar { padding-inline: 24px; }
+}
 .header[data-scrolled="true"] .panel { max-height: calc(100dvh - var(--header-h) - 48px); }
 @media (max-width: 1079px) {
   .header[data-scrolled="true"] { width: calc(100% - 24px); transform: translateY(8px); }
