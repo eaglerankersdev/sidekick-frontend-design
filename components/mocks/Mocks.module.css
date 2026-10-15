@@ -1253,7 +1253,14 @@
 .aiEdit { display: flex; gap: 8px; width: 100%; }
 .aiEdit input { min-width: 0; width: 100%; border: 1px solid var(--border-strong); border-radius: 8px; padding: 8px; background: var(--white); }
 .aiEdit button { min-height: 44px; padding: 8px 12px; color: var(--cobalt); font-weight: 700; }
-@media (max-width: 600px) { .aiRow { align-items: flex-start; } .aiBtns { flex-wrap: wrap; } }
+@media (max-width: 600px) {
+  .aiRow { align-items: flex-start; border: 0; background: var(--canvas); }
+  .aiRow > span:first-child { width: 100%; }
+  .aiBtns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; gap: 6px; }
+  .aiBtns button { padding-inline: 5px; }
+  .aiRow:not([data-state="pending"]) .aiBtns { grid-template-columns: minmax(0, 1fr) auto; }
+  .aiRow:not([data-state="pending"]) .aiBtns button { padding-inline: 12px; }
+}
 
 @media (prefers-reduced-motion: no-preference) {
   .row { animation: record-arrive .24s var(--ease-out); }
