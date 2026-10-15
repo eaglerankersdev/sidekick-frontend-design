@@ -12,6 +12,8 @@ import { CTASection, FeatureStatusBadge } from "@/components/marketing/ui";
 import { Browser, Phone, DashboardMock, JobPhoneMock, AISuggestionMock, BuilderMock, ProposalMock, PreviewLabel } from "@/components/mocks/Mocks";
 import { industries } from "@/content/industries";
 import { IndustryMarquee } from "@/components/marketing/IndustryMarquee";
+import { Testimonials } from "@/components/marketing/Testimonials";
+import { demoTestimonials } from "@/content/testimonials";
 import { plans } from "@/content/pricing";
 import s from "./home.module.css";
 
@@ -272,6 +274,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <Testimonials items={demoTestimonials} preview />
 
       {/* 9. Plans for 1, 2 or 3 services */}
       <section className="section">
