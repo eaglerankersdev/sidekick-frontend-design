@@ -57,3 +57,14 @@ html:has(.sheet[open]) { scrollbar-gutter: auto; }
 
 /* Avoid rectangular touch flashes; :focus-visible still marks keyboard focus. */
 .burger, .sheet a, .sheet button, .sheet summary { -webkit-tap-highlight-color: transparent; }
+
+/* Keep the navigation crisp, with feedback that follows the pointer or thumb. */
+.header { background: var(--white); backdrop-filter: none; }
+.panelLink { transition: background .2s var(--ease-out), color .2s; }
+.panelLink:hover .panelLabel { color: var(--cobalt); }
+.panelLink:hover .panelIcon { background: var(--cobalt); color: var(--white); }
+.panelIcon { transition: color .2s, background .2s; }
+.acc summary svg { transition: transform .25s var(--ease-out); }
+.sheet[open] { animation: drawer-enter .3s var(--ease-out); }
+@keyframes drawer-enter { from { transform: translateX(24px); opacity: .5; } to { transform: translateX(0); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .sheet[open] { animation: none; } }
