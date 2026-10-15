@@ -6,6 +6,7 @@
  */
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import gsap from "gsap";
 import { ArrowRight } from "lucide-react";
 import { industries } from "@/content/industries";
@@ -28,7 +29,8 @@ export function IndustrySwitcher() {
     }
     if (!panel.current || prefersReducedMotion()) return;
     const items = panel.current.querySelectorAll(`.${s.anim}`);
-    gsap.fromTo(items, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out", stagger: 0.06, overwrite: true });
+    const animation = gsap.fromTo(items, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out", stagger: 0.06, overwrite: true });
+    return () => { animation.kill(); gsap.set(items, { clearProps: "opacity,transform" }); };
   }, [idx]);
 
   const onKey = (e: React.KeyboardEvent) => {
@@ -92,6 +94,7 @@ export function IndustrySwitcher() {
           </Link>
         </div>
         <div className={s.visual}>
+          <div className={s.servicePhoto}><Image key={ind.slug} src={`/images/industries/${ind.slug}.svg`} alt={`${ind.name} service work`} width={800} height={500} sizes="(max-width: 960px) 90vw, 520px" /></div>
           <div className={`${s.visualInner} ${s.anim}`}>
             <PreviewLabel>Same CRM, configured for {ind.navName}</PreviewLabel>
             <div className={s.stack}>
