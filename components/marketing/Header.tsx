@@ -21,6 +21,33 @@ export function Header() {
   const pathname = usePathname();
   const [open, setOpen] = useState<MenuKey | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hoverOpened = useRef(false);
+  const clearHover = () => {
+    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    hoverTimer.current = null;
+  };
+  const hoverMenu = (key: MenuKey) => {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    clearHover();
+    hoverTimer.current = setTimeout(() => { hoverOpened.current = true; setOpen(key); }, 100);
+  };
+  const leaveMenu = () => {
+    clearHover();
+    hoverTimer.current = setTimeout(() => {
+      // Keep a keyboard-focused menu available even when the pointer leaves it.
+      const focusedPanel = document.activeElement?.closest('[data-nav-menu]');
+      if (!focusedPanel) setOpen(null);
+    }, 180);
+  };
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(previous => window.scrollY > (previous ? 24 : 72));
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => { window.removeEventListener("scroll", onScroll); clearHover(); };
+  }, []);
   const header = useRef<HTMLElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
@@ -30,6 +57,7 @@ export function Header() {
 
   useEffect(() => {
     if (previousPath.current !== pathname) {
+      clearHover();
       setOpen(null);
       setMobileOpen(false);
       previousPath.current = pathname;
@@ -42,7 +70,8 @@ export function Header() {
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape" && open) {
-        triggers.current[open]?.focus();
+        clearHover();
+        triggers.current[open]?.focus({ preventScroll: true });
         setOpen(null);
       }
     };
@@ -81,7 +110,7 @@ export function Header() {
     : key === "industries" ? pathname.startsWith("/industries") : pathname === "/white-label";
 
   return (
-    <header className={s.header} ref={header} onBlur={(e) => {
+    <header className={s.header} data-scrolled={scrolled && !mobileOpen} ref={header} onBlur={(e) => {
       if (!e.currentTarget.contains(e.relatedTarget as Node)) setOpen(null);
     }}>
       <div className={`container ${s.bar}`}>
@@ -91,14 +120,20 @@ export function Header() {
         <nav className={s.nav} aria-label="Primary">
           <ul role="list" className={s.list}>
             {menus.map((menu) => (
-              <li key={menu.key}>
+              <li key={menu.key} data-nav-menu onPointerEnter={(e) => { if (e.pointerType !== "touch") hoverMenu(menu.key); }} onPointerLeave={leaveMenu}>
                 <button type="button" ref={(el) => { triggers.current[menu.key] = el; }}
                   className={`${s.link} ${active(menu.key) ? s.linkActive : ""}`}
                   aria-expanded={open === menu.key} aria-controls={`nav-${menu.key}`}
-                  onClick={() => setOpen(open === menu.key ? null : menu.key)}
+                  onClick={() => {
+                    clearHover();
+                    setOpen(open === menu.key && !hoverOpened.current ? null : menu.key);
+                    hoverOpened.current = false;
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === "ArrowDown") {
                       e.preventDefault();
+                      clearHover();
+                      hoverOpened.current = false;
                       setOpen(menu.key);
                       requestAnimationFrame(() => document.querySelector<HTMLAnchorElement>(`#nav-${menu.key} a`)?.focus());
                     }
@@ -131,7 +166,7 @@ export function Header() {
         </div>
       </div>
       <dialog ref={dialog} id="mobile-menu" className={s.sheet} aria-label="Navigation menu"
-        onCancel={() => setMobileOpen(false)} onClose={() => { setMobileOpen(false); burger.current?.focus(); }}
+        onCancel={() => setMobileOpen(false)} onClose={() => { setMobileOpen(false); burger.current?.focus({ preventScroll: true }); }}
         onClick={(e) => { if (e.target === e.currentTarget) setMobileOpen(false); }}>
         <div className={s.sheetContent}>
           <div className={s.sheetTop}><HomeLink onClick={() => setMobileOpen(false)} aria-label="SideKick CRM home"><Image src="/brand/sidekick-crm-logo.png" alt="SideKick CRM" width={2048} height={778} sizes="154px" /></HomeLink><button ref={closeButton} autoFocus type="button" className={s.burger} aria-label="Close menu" onClick={() => setMobileOpen(false)}><X aria-hidden /></button></div>
