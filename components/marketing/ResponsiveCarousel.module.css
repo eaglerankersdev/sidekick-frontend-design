@@ -1,0 +1,18 @@
+.carousel { min-width: 0; }
+.controls { display: none; }
+@media (max-width: 999px) {
+  .track.track { position: relative; display: flex; gap: 16px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 6px 4px 18px; margin: -6px -4px 0; scroll-padding-inline: 4px; }
+  .track::-webkit-scrollbar { display: none; }
+  .track > * { flex: 0 0 86%; min-width: 0; scroll-snap-align: start; height: auto; }
+  .controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; }
+  .controls > button { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border: 1px solid var(--border); border-radius: 50%; color: var(--navy); background: var(--white); transition: background .2s, color .2s; }
+  .controls > button:hover:not(:disabled) { background: var(--navy); color: var(--white); }
+  .controls > button:disabled { opacity: .3; }
+  .controls svg { width: 19px; height: 19px; }
+  .positions { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; }
+  .positions button { display: grid; place-items: center; width: 30px; height: 44px; }
+  .positions span { width: 6px; height: 6px; border-radius: 99px; background: var(--border-strong); transition: width .25s, background .25s; }
+  .positions [aria-current] span { width: 22px; background: var(--cobalt); }
+}
+@media (min-width: 640px) and (max-width: 999px) { .track.track { gap: 20px; } .track > * { flex-basis: 46%; } }
+@media (prefers-reduced-motion: reduce) { .controls button, .positions span { transition: none; } }
