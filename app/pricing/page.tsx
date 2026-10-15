@@ -1,3 +1,4 @@
+import { ResponsiveCarousel } from "@/components/marketing/ResponsiveCarousel";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Check, Minus, Layers3, Globe, Info } from "lucide-react";
@@ -37,7 +38,7 @@ export default function PricingPage() {
       {/* 1. Three plan cards */}
       <section className="section section--white" style={{ paddingTop: 40 }}>
         <div className="container">
-          <div className={s.plans} data-reveal-stagger>
+          <ResponsiveCarousel className={s.plans} label="Plans">
             {plans.map((p) => (
               <div key={p.key} className={`card ${s.plan} ${p.featured ? s.planFeatured : ""}`}>
                 {p.featured && <span className={s.ribbon}>Most flexible</span>}
@@ -70,7 +71,7 @@ export default function PricingPage() {
                 </Link>
               </div>
             ))}
-          </div>
+          </ResponsiveCarousel>
           <p className={s.fine} data-reveal>
             <Info aria-hidden /> Plan names other than Basic, prices and feature limits come from the final commercial configuration. No
             prices, trials or guarantees are published here.
@@ -190,7 +191,7 @@ export default function PricingPage() {
             <h2>Your accounts, their charges.</h2>
             <p>Connected services may involve separate third-party fees billed by those providers.</p>
           </div>
-          <div className="grid grid--3" data-reveal-stagger>
+          <ResponsiveCarousel className="grid grid--3" label="Provider integrations">
             {[
               { icon: <BrandLogo brand="stripe" />, title: "Stripe", body: "You connect your own Stripe account. Stripe's processing fees apply.", f: "stripeInvoices" as const },
               { icon: <BrandLogo brand="gmail" />, title: "Email", body: "You connect your own sending account. Its plan and limits apply.", f: "emailSender" as const },
@@ -205,7 +206,7 @@ export default function PricingPage() {
                 <p>{c.body}</p>
               </div>
             ))}
-          </div>
+          </ResponsiveCarousel>
           <p className={s.fine} data-reveal>
             <Info aria-hidden /> Plan checkout is web-only. There is no native in-app subscription purchase.
           </p>
