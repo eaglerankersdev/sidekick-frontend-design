@@ -85,7 +85,7 @@
 .ctaCard {
   position: relative;
   overflow: hidden;
-  background: var(--navy);
+  background: radial-gradient(ellipse 75% 80% at 50% 115%, var(--ice) 0%, var(--light-blue) 14%, var(--cobalt) 42%, var(--navy) 78%);
   color: #fff;
   border-radius: var(--r-xl);
   padding: clamp(48px, 7vw, 96px) clamp(24px, 5vw, 72px);
