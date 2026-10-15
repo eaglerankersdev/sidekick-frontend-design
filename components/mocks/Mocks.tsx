@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { TowTruck } from "@/components/marketing/NavIcon";
 /**
  * Product UI mockups rendered in HTML/CSS so they stay crisp at any size.
@@ -37,7 +40,7 @@ export function PreviewLabel({ children = "Product preview · sample data" }: { 
 /* ---------- Browser frame ---------- */
 export function Browser({ children, url = "app.sidekickcrm.com", className = "" }: { children: React.ReactNode; url?: string; className?: string }) {
   return (
-    <div className={`${s.browser} ${className}`}>
+    <div data-ui className={`${s.browser} ${className}`}>
       <div className={s.browserBar}>
         <span className={s.dots}>
           <i />
@@ -54,7 +57,7 @@ export function Browser({ children, url = "app.sidekickcrm.com", className = "" 
 /* ---------- Phone frame ---------- */
 export function Phone({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`${s.phone} ${className}`}>
+    <div data-ui className={`${s.phone} ${className}`}>
       <div className={s.phoneScreen}>
       <div className={s.phoneStatus}>
         <span>9:41</span>
@@ -73,6 +76,13 @@ export function Phone({ children, className = "" }: { children: React.ReactNode;
 
 /* ---------- Dashboard ---------- */
 export function DashboardMock({ compact = false, brand = "Workspace", mobilePreview = false }: { compact?: boolean; brand?: string; mobilePreview?: boolean }) {
+  const [view, setView] = useState("leads");
+  const records: Record<string, { title: string; rows: string[][] }> = {
+    leads: { title: "Recent leads", rows: [["Driveway + walkway clean", "Website form", "New"], ["Two-story siding wash", "Manual entry", "Quote prepared"], ["Deck restoration inquiry", "Website form", "Scheduled"], ["Commercial lot clean", "Phone", "Assigned"]] },
+    quotes: { title: "Quotes to review", rows: [["Driveway + walkway clean", "Quote #1042", "Review"], ["Two-story siding wash", "Quote #1043", "Draft"], ["Deck restoration", "Quote #1044", "Review"], ["Commercial lot clean", "Quote #1045", "Draft"]] },
+    jobs: { title: "Scheduled jobs", rows: [["Driveway + walkway clean", "Today · 9:00", "Crew A"], ["Two-story siding wash", "Today · 10:30", "Crew B"], ["Deck restoration", "Tomorrow", "Crew A"], ["Commercial lot clean", "Friday", "Crew B"]] },
+    paid: { title: "Paid invoices", rows: [["Driveway + walkway clean", "Invoice #1042", "$240"], ["Two-story siding wash", "Invoice #1039", "$320"], ["Deck restoration", "Invoice #1038", "$480"], ["Commercial lot clean", "Invoice #1035", "$650"]] },
+  };
   return (
     <div className={`${s.app} ${compact ? s.appCompact : ""} ${mobilePreview ? s.mobilePreview : ""}`}>
       <aside className={s.side}>
@@ -121,26 +131,21 @@ export function DashboardMock({ compact = false, brand = "Workspace", mobilePrev
             ["Jobs scheduled", "Next 7 days", "jobs"],
             ["Invoices paid", "Via your Stripe", "paid"],
           ].map(([t, d, k]) => (
-            <div key={t} className={s.kpi}>
+            <button type="button" key={t} className={s.kpi} aria-pressed={view === k} aria-label={`Preview ${t.toLowerCase()}`} onClick={() => setView(k)}>
               <span className={s.kpiLabel}>{t}</span>
               <span className={`${s.kpiBar} ${s[`bar_${k}`]}`} />
               <span className={s.kpiHint}>{d}</span>
-            </div>
+            </button>
           ))}
         </div>
         <div className={s.panels}>
           <div className={s.panel}>
             <div className={s.panelHead}>
-              <strong>Recent leads</strong>
+              <strong aria-live="polite">{records[view].title}</strong>
               <span>Pressure Washing</span>
             </div>
-            {[
-              ["Driveway + walkway clean", "Website form", "New"],
-              ["Two-story siding wash", "Manual entry", "Quote prepared"],
-              ["Deck restoration inquiry", "Website form", "Scheduled"],
-              ["Commercial lot clean", "Phone", "Assigned"],
-            ].map(([t, src, st]) => (
-              <div key={t} className={s.row}>
+            {records[view].rows.map(([t, src, st]) => (
+              <div key={`${view}-${t}`} className={s.row}>
                 <i className={s.rowDot} />
                 <span className={s.rowTitle}>{t}</span>
                 <span className={s.rowSrc}>{src}</span>
@@ -370,33 +375,37 @@ export function ProposalMock() {
 
 /* ---------- AI suggestion panel ---------- */
 export function AISuggestionMock() {
+  const [fields, setFields] = useState([
+    { name: "Surface type", state: "pending" },
+    { name: "Approx. area (sq ft)", state: "pending" },
+    { name: "Access notes", state: "pending" },
+  ]);
+  const [editing, setEditing] = useState<number | null>(null);
+  const update = (index: number, state: string) => setFields(previous => previous.map((f, i) => i === index ? { ...f, state } : f));
   return (
-    <div className={s.ai}>
+    <div className={s.ai} data-ui data-ai-preview>
       <div className={s.aiIn}>
-        <span className={s.aiLabel}>You typed</span>
+        <span className={s.aiLabel}>Interactive concept · sample data</span>
         <strong>"We clean driveways, roofs and commercial lots."</strong>
       </div>
       <div className={s.aiOut}>
-        <span className={s.aiLabel}>
-          <Sparkles /> Suggested fields
-        </span>
-        {["Surface type", "Approx. area (sq ft)", "Access notes"].map((f) => (
-          <div key={f} className={s.aiRow}>
-            <span>{f}</span>
-            <span className={s.aiBtns}>
-              <i className={s.aiAccept}>
-                <Check /> Accept
-              </i>
-              <i>
-                <Pencil /> Edit
-              </i>
-              <i>
-                <X /> Ignore
-              </i>
-            </span>
+        <span className={s.aiLabel}><Sparkles /> Suggested fields</span>
+        {fields.map((f, index) => (
+          <div key={index} className={s.aiRow} data-state={f.state}>
+            {editing === index ? <form className={s.aiEdit} onSubmit={e => { e.preventDefault(); setEditing(null); }}>
+              <input autoFocus aria-label="Field name" value={f.name} maxLength={40} onChange={e => setFields(previous => previous.map((field, i) => i === index ? { ...field, name: e.target.value } : field))} />
+              <button type="submit" disabled={!f.name.trim()}>Save</button>
+            </form> : <span>{f.name}</span>}
+            {editing !== index && <span className={s.aiBtns}>
+              {f.state === "pending" ? <>
+                <button type="button" className={s.aiAccept} onClick={() => update(index, "accepted")} aria-label={`Accept ${f.name}`}><Check /> Accept</button>
+                <button type="button" onClick={() => setEditing(index)} aria-label={`Edit ${f.name}`}><Pencil /> Edit</button>
+                <button type="button" onClick={() => update(index, "ignored")} aria-label={`Ignore ${f.name}`}><X /> Ignore</button>
+              </> : <><strong className={s.aiResult} role="status">{f.state === "accepted" ? "Accepted in preview" : "Ignored in preview"}</strong><button type="button" onClick={() => update(index, "pending")} aria-label={`Undo ${f.name}`}>Undo</button></>}
+            </span>}
           </div>
         ))}
-        <span className={s.aiNote}>Nothing changes until you accept it.</span>
+        <span className={s.aiNote}>Try accepting, editing or ignoring a suggestion. This preview does not change your CRM.</span>
       </div>
     </div>
   );
