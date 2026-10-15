@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
-import { ArrowLeft, ArrowRight, Quote, UserRound, Pause, Play } from "lucide-react";
+import { ArrowLeft, ArrowRight, Quote, UserRound } from "lucide-react";
 import s from "./Testimonials.module.css";
 
 export type Testimonial = { id: string; quote: string; name: string; role: string; company: string; portrait?: string };
 
 export function Testimonials({ items, preview = false }: { items: Testimonial[]; preview?: boolean }) {
   const [selected, setSelected] = useState(0);
+  const [groupSize, setGroupSize] = useState(3);
   const [paused, setPaused] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -15,6 +16,9 @@ export function Testimonials({ items, preview = false }: { items: Testimonial[];
   const root = useRef<HTMLElement>(null);
   const id = useId();
   useEffect(() => {
+    const mobile = window.matchMedia("(max-width: 700px)");
+    const updateGroup = () => setGroupSize(mobile.matches ? 2 : 3);
+    updateGroup(); mobile.addEventListener("change", updateGroup);
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
     const update = () => setReduced(query.matches);
     update(); query.addEventListener("change", update);
@@ -22,7 +26,7 @@ export function Testimonials({ items, preview = false }: { items: Testimonial[];
     if (root.current) observer.observe(root.current);
     const visibility = () => { if (document.hidden) setPaused(true); };
     document.addEventListener("visibilitychange", visibility);
-    return () => { observer.disconnect(); query.removeEventListener("change", update); document.removeEventListener("visibilitychange", visibility); };
+    return () => { mobile.removeEventListener("change", updateGroup); observer.disconnect(); query.removeEventListener("change", update); document.removeEventListener("visibilitychange", visibility); };
   }, []);
   const playing = !paused && !hovered && visible && !reduced && items.length > 1;
   useEffect(() => {
@@ -36,6 +40,7 @@ export function Testimonials({ items, preview = false }: { items: Testimonial[];
   const index = Math.min(selected, items.length - 1);
   const select = (next: number, focus = false) => {
     const normalized = (next + items.length) % items.length;
+    setPaused(true);
     setSelected(normalized);
     if (focus) requestAnimationFrame(() => tabs.current[normalized]?.focus({ preventScroll: true }));
   };
@@ -43,7 +48,7 @@ export function Testimonials({ items, preview = false }: { items: Testimonial[];
     const next = event.key === "ArrowRight" ? index + 1 : event.key === "ArrowLeft" ? index - 1 : event.key === "Home" ? 0 : event.key === "End" ? items.length - 1 : null;
     if (next !== null) { event.preventDefault(); select(next, true); }
   };
-  return <section className={`section ${s.section}`} aria-labelledby={`${id}-title`} data-testimonials ref={root} onPointerEnter={event => { if (event.pointerType === "mouse") setHovered(true); }} onPointerLeave={() => setHovered(false)} onFocusCapture={event => { if (!(event.target as HTMLElement).closest("[data-rotation-control]")) setPaused(true); }}>
+  return <section className={`section ${s.section}`} aria-labelledby={`${id}-title`} data-testimonials ref={root} onPointerEnter={event => { if (event.pointerType === "mouse") setHovered(true); }} onPointerLeave={() => setHovered(false)} onFocusCapture={() => setPaused(true)}>
     <div className={`container ${s.layout}`}>
       <div className={s.heading}>
         <h2 id={`${id}-title`}>In their own words.</h2>
@@ -69,21 +74,20 @@ export function Testimonials({ items, preview = false }: { items: Testimonial[];
         <div className={s.controls}>
           <p className={s.status} aria-live={playing ? "off" : "polite"} aria-atomic="true">{index + 1} of {items.length}<span> — {items[index].name}</span></p>
           <div className={s.arrows}>
-            <button type="button" data-rotation-control aria-label={paused || reduced ? "Play testimonials" : "Pause testimonials"} onClick={() => setPaused(value => !value)} disabled={reduced || items.length < 2}>{paused || reduced ? <Play aria-hidden /> : <Pause aria-hidden />}</button>
             <button type="button" aria-label="Previous testimonial" onClick={() => select(index - 1)} disabled={items.length < 2}><ArrowLeft aria-hidden /></button>
             <button type="button" aria-label="Next testimonial" onClick={() => select(index + 1)} disabled={items.length < 2}><ArrowRight aria-hidden /></button>
           </div>
         </div>
       </div>
       <div role="tablist" aria-label="Customer testimonials" className={s.tabs} onKeyDown={onKey}>
-        {items.map((item, i) => <button key={item.id} ref={el => { tabs.current[i] = el; }} type="button" role="tab" hidden={Math.floor(i / 3) !== Math.floor(index / 3)} id={`${id}-tab-${i}`} aria-controls={`${id}-panel-${i}`} aria-selected={index === i} tabIndex={index === i ? 0 : -1} onClick={() => select(i)}>
+        {items.map((item, i) => <button key={item.id} ref={el => { tabs.current[i] = el; }} type="button" role="tab" hidden={Math.floor(i / groupSize) !== Math.floor(index / groupSize)} id={`${id}-tab-${i}`} aria-controls={`${id}-panel-${i}`} aria-selected={index === i} tabIndex={index === i ? 0 : -1} onClick={() => select(i)}>
           <span className={s.tabAvatar} aria-hidden>{item.portrait ? <img src={item.portrait} alt="" width={38} height={38} loading="lazy" /> : <UserRound />}</span>
           <span><strong>{item.name}</strong><small>{item.company}</small></span>
           <ArrowRight className={s.tabArrow} aria-hidden />
         </button>)}
       </div>
       <div className={s.groups} aria-label="Testimonial groups">
-        {Array.from({ length: Math.ceil(items.length / 3) }, (_, group) => <button key={group} type="button" aria-label={`Show testimonial group ${group + 1}`} aria-pressed={Math.floor(index / 3) === group} onClick={() => select(group * 3)}><span /></button>)}
+        {Array.from({ length: Math.ceil(items.length / groupSize) }, (_, group) => <button key={group} type="button" aria-label={`Show testimonial group ${group + 1}`} aria-pressed={Math.floor(index / groupSize) === group} onClick={() => select(group * groupSize)}><span /></button>)}
       </div>
     </div>
   </section>;
