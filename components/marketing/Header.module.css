@@ -68,3 +68,32 @@ html:has(.sheet[open]) { scrollbar-gutter: auto; }
 .sheet[open] { animation: drawer-enter .3s var(--ease-out); }
 @keyframes drawer-enter { from { transform: translateX(24px); opacity: .5; } to { transform: translateX(0); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .sheet[open] { animation: none; } }
+
+/* The same header becomes a floating capsule after leaving the page top.
+   Its reserved height stays unchanged, so content never jumps. */
+.header {
+  width: 100%;
+  margin-inline: auto;
+  transition: width .38s var(--ease-out), transform .38s var(--ease-out), border-radius .38s var(--ease-out), box-shadow .38s var(--ease-out), border-color .2s;
+}
+.header[data-scrolled="true"] {
+  width: calc(100% - clamp(32px, 6vw, 96px));
+  transform: translateY(12px);
+  border-radius: 999px;
+  border-bottom-color: transparent;
+  box-shadow: 0 8px 28px -10px rgb(0 32 82 / .22);
+}
+.header[data-scrolled="true"] .demo { border-radius: 999px; }
+.header[data-scrolled="true"] .panel { max-height: calc(100dvh - var(--header-h) - 48px); }
+@media (max-width: 1079px) {
+  .header[data-scrolled="true"] { width: calc(100% - 24px); transform: translateY(8px); }
+  .header[data-scrolled="true"] .bar { padding-inline: 20px; }
+}
+@media (max-width: 375px) {
+  .header[data-scrolled="true"] { width: calc(100% - 16px); }
+  .header[data-scrolled="true"] .bar { padding-inline: 16px; gap: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .header { transition: none; }
+  .panel { animation: none; }
+}
