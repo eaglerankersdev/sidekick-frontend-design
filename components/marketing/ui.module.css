@@ -339,3 +339,21 @@
   .heroSplit .heroVisual { grid-row: 2; }
   .heroSplit .heroActions { grid-row: 3; margin-top: 0; width: 100%; }
 }
+
+/* Flat brand fields give the closing action and preview sections clearer hierarchy. */
+.ctaOrbA, .ctaOrbB, .ctaGrid { display: none; }
+.ctaCard { padding-block: clamp(40px, 5.5vw, 76px); }
+.faq { box-shadow: none; transition: background .2s, border-color .2s; }
+.faq[open] { box-shadow: none; background: var(--ice); }
+.faq summary { min-height: 64px; }
+.faqBody { max-width: 70ch; line-height: 1.75; }
+@media (prefers-reduced-motion: no-preference) {
+  .faq[open] .faqBody { animation: answer-enter .25s var(--ease-out); }
+}
+@keyframes answer-enter { from { opacity: .4; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@media (max-width: 600px) {
+  .faq summary { padding: 18px 16px; font-size: 1rem; line-height: 1.45; }
+  .faqBody { padding: 0 16px 20px; }
+  .heroIntro { max-width: 36ch; }
+  .ctaCard { padding: 36px 20px; }
+}
