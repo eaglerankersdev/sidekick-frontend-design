@@ -26,6 +26,42 @@ export function ResponsiveCarousel({ children, label, className = "" }: { childr
     observer.observe(el);
     return () => { el.removeEventListener("scroll", update); observer.disconnect(); };
   }, [count]);
+  useEffect(() => {
+    const el = track.current;
+    if (!el || count < 2) return;
+    let timer: ReturnType<typeof setTimeout>;
+    let visible = false;
+    let dragging = false;
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)");
+    const schedule = () => {
+      clearTimeout(timer);
+      if (!visible || dragging || document.hidden || reduced.matches) return;
+      timer = setTimeout(() => {
+        const keyboardFocus = el.parentElement?.querySelector(":focus-visible");
+        if (keyboardFocus || el.scrollWidth <= el.clientWidth + 2) { schedule(); return; }
+        const cards = Array.from(el.children) as HTMLElement[];
+        const end = el.scrollLeft >= el.scrollWidth - el.clientWidth - 2;
+        el.scrollTo({ left: end ? 0 : el.scrollLeft + cards[1].offsetLeft - cards[0].offsetLeft, behavior: "smooth" });
+        schedule();
+      }, 6000);
+    };
+    const down = () => { dragging = true; clearTimeout(timer); };
+    const up = () => { dragging = false; schedule(); };
+    const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; schedule(); }, { threshold: .25 });
+    observer.observe(el);
+    el.addEventListener("scroll", schedule, { passive: true });
+    el.addEventListener("pointerdown", down);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
+    document.addEventListener("visibilitychange", schedule);
+    reduced.addEventListener("change", schedule);
+    return () => {
+      clearTimeout(timer); observer.disconnect();
+      el.removeEventListener("scroll", schedule); el.removeEventListener("pointerdown", down);
+      window.removeEventListener("pointerup", up); window.removeEventListener("pointercancel", up);
+      document.removeEventListener("visibilitychange", schedule); reduced.removeEventListener("change", schedule);
+    };
+  }, [count]);
   const go = (index: number) => {
     const el = track.current;
     if (!el) return;
