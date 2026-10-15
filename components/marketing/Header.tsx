@@ -50,6 +50,8 @@ export function Header() {
   }, []);
   const header = useRef<HTMLElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
+  const drawerAnimation = useRef<Animation | null>(null);
+  const savedOverflow = useRef<string | null>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
   const triggers = useRef<Record<string, HTMLButtonElement | null>>({});
   const burger = useRef<HTMLButtonElement>(null);
@@ -86,24 +88,43 @@ export function Header() {
   useEffect(() => {
     const sheet = dialog.current;
     if (!sheet) return;
-    if (!mobileOpen) {
+    const currentTransform = sheet.open ? getComputedStyle(sheet).transform : "translateX(100%)";
+    drawerAnimation.current?.cancel();
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const finishClose = () => {
       if (sheet.open) sheet.close();
-      return;
+      if (savedOverflow.current !== null) {
+        document.documentElement.style.overflow = savedOverflow.current;
+        savedOverflow.current = null;
+      }
+    };
+    if (mobileOpen) {
+      setOpen(null);
+      if (savedOverflow.current === null) savedOverflow.current = document.documentElement.style.overflow;
+      document.documentElement.style.overflow = "hidden";
+      if (!sheet.open) sheet.showModal();
+      closeButton.current?.focus({ preventScroll: true });
+      drawerAnimation.current = sheet.animate(
+        [{ transform: currentTransform }, { transform: "translateX(0)" }],
+        { duration: reduced ? 0 : 420, easing: "cubic-bezier(.22, 1, .36, 1)", fill: "both" }
+      );
+    } else if (sheet.open) {
+      drawerAnimation.current = sheet.animate(
+        [{ transform: currentTransform }, { transform: "translateX(100%)" }],
+        { duration: reduced ? 0 : 280, easing: "cubic-bezier(.4, 0, .2, 1)", fill: "both" }
+      );
+      drawerAnimation.current.onfinish = finishClose;
     }
-    setOpen(null);
-    sheet.showModal();
-    closeButton.current?.focus({ preventScroll: true });
-    const previous = document.documentElement.style.overflow;
-    document.documentElement.style.overflow = "hidden";
     const desktop = window.matchMedia("(min-width: 1080px)");
     const onResize = () => { if (desktop.matches) setMobileOpen(false); };
     desktop.addEventListener("change", onResize);
-    return () => {
-      document.documentElement.style.overflow = previous;
-      desktop.removeEventListener("change", onResize);
-      if (sheet.open) sheet.close();
-    };
+    return () => desktop.removeEventListener("change", onResize);
   }, [mobileOpen]);
+
+  useEffect(() => () => {
+    drawerAnimation.current?.cancel();
+    if (savedOverflow.current !== null) document.documentElement.style.overflow = savedOverflow.current;
+  }, []);
 
   const active = (key: MenuKey) => key === "product"
     ? pathname.startsWith("/features") || pathname === "/integrations"
@@ -166,7 +187,7 @@ export function Header() {
         </div>
       </div>
       <dialog ref={dialog} id="mobile-menu" className={s.sheet} aria-label="Navigation menu"
-        onCancel={() => setMobileOpen(false)} onClose={() => { setMobileOpen(false); burger.current?.focus({ preventScroll: true }); }}
+        onCancel={event => { event.preventDefault(); setMobileOpen(false); }} onClose={() => { setMobileOpen(false); burger.current?.focus({ preventScroll: true }); }}
         onClick={(e) => { if (e.target === e.currentTarget) setMobileOpen(false); }}>
         <div className={s.sheetContent}>
           <div className={s.sheetTop}><HomeLink onClick={() => setMobileOpen(false)} aria-label="SideKick CRM home"><Image src="/brand/sidekick-crm-logo.png" alt="SideKick CRM" width={2048} height={778} sizes="154px" /></HomeLink><button ref={closeButton} autoFocus type="button" className={s.burger} aria-label="Close menu" onClick={() => setMobileOpen(false)}><MenuIcon open={mobileOpen} /></button></div>
