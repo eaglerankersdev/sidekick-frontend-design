@@ -122,9 +122,9 @@
 }
 
 /* The work itself anchors the interactive configuration preview. */
-.servicePhoto { height: clamp(150px, 20vw, 220px); overflow: hidden; border-radius: 16px; margin-bottom: 16px; background: var(--ice); }
-.servicePhoto img { width: 100%; height: 100%; object-fit: cover; animation: industry-arrive .35s var(--ease-out); }
-@keyframes industry-arrive { from { opacity: .65; transform: scale(1.025); } to { opacity: 1; transform: scale(1); } }
+.servicePhoto { aspect-ratio: 8 / 5; overflow: hidden; border-radius: 16px; margin-bottom: 16px; background: var(--ice); }
+.servicePhoto img { width: 100%; height: 100%; object-fit: contain; animation: industry-arrive .35s var(--ease-out); }
+@keyframes industry-arrive { from { opacity: .65; } to { opacity: 1; } }
 .panel { box-shadow: none; background: var(--canvas); border-color: transparent; }
 .visualInner { background: var(--ice); border: 0; padding: 16px; }
 .tab { border-radius: 12px; box-shadow: none; }
