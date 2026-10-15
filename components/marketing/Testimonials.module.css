@@ -44,8 +44,9 @@
   .author { margin-top: 24px; gap: 12px; }
   .author span { line-height: 1.5; }
   .tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
-  .tabs button { min-height: 56px; padding: 10px 12px; border-radius: 999px; gap: 8px; }
+  .tabs button { min-height: 60px; padding: 12px 20px; border-radius: 999px; gap: 8px; }
   .tabs strong { font-size: .82rem; }
+  .tabs button > span:nth-child(2) { flex: 1; }
   .tabs small { font-size: .72rem; }
   .tabAvatar { display: none; }
   .tabArrow { width: 14px; }
