@@ -1228,3 +1228,28 @@
   .mobilePreview .panel { padding: 8px; gap: 2px; }
   .mobilePreview .row { min-height: 32px; }
 }
+
+/* Interactive sample records retain the same footprint as the static preview. */
+.kpi { text-align: left; min-height: 64px; transition: background .2s, border-color .2s; }
+.kpi[aria-pressed="true"] { background: var(--ice); border-color: var(--light-blue); }
+.kpi:hover { border-color: var(--cobalt); }
+.kpi:focus-visible { outline-offset: 2px; }
+.aiBtns button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-height: 44px; padding: 6px 9px; border-radius: 8px; font-size: .78rem; font-weight: 700; background: var(--canvas); transition: background .2s, transform .2s; }
+.aiBtns button svg { width: 13px; height: 13px; }
+.aiBtns button:hover { background: var(--ice); }
+.aiBtns button:active { transform: scale(.97); }
+.aiBtns .aiAccept { color: var(--ok); background: var(--ok-bg); }
+.aiRow { min-height: 76px; flex-wrap: wrap; gap: 10px; }
+.aiRow[data-state="accepted"] { background: var(--ok-bg); }
+.aiResult { font-size: .78rem; color: var(--navy); }
+.aiEdit { display: flex; gap: 8px; width: 100%; }
+.aiEdit input { min-width: 0; width: 100%; border: 1px solid var(--border-strong); border-radius: 8px; padding: 8px; background: var(--white); }
+.aiEdit button { min-height: 44px; padding: 8px 12px; color: var(--cobalt); font-weight: 700; }
+@media (max-width: 600px) { .aiRow { align-items: flex-start; } .aiBtns { flex-wrap: wrap; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  .row { animation: record-arrive .24s var(--ease-out); }
+}
+@keyframes record-arrive { from { opacity: .5; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.aiLabel { font-size: .78rem; text-transform: none; letter-spacing: 0; }
+.aiNote { font-size: .8rem; line-height: 1.6; }
