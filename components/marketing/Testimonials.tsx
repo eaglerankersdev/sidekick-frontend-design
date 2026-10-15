@@ -12,7 +12,6 @@ export function Testimonials({ items, preview = false }: { items: Testimonial[];
   const [pageHidden, setPageHidden] = useState(false);
   const [keyboardFocused, setKeyboardFocused] = useState(false);
   const [interaction, setInteraction] = useState(0);
-  const [hovered, setHovered] = useState(false);
   const [visible, setVisible] = useState(false);
   const [reduced, setReduced] = useState(false);
   const root = useRef<HTMLElement>(null);
@@ -31,7 +30,7 @@ export function Testimonials({ items, preview = false }: { items: Testimonial[];
     document.addEventListener("visibilitychange", visibility);
     return () => { mobile.removeEventListener("change", updateGroup); observer.disconnect(); query.removeEventListener("change", update); document.removeEventListener("visibilitychange", visibility); };
   }, []);
-  const playing = !pageHidden && !keyboardFocused && !hovered && visible && !reduced && items.length > 1;
+  const playing = !pageHidden && !keyboardFocused && visible && !reduced && items.length > 1;
   useEffect(() => {
     if (!playing) return;
     const timer = setTimeout(() => setSelected(value => (value + 1) % items.length), 6500);
@@ -51,7 +50,7 @@ export function Testimonials({ items, preview = false }: { items: Testimonial[];
     const next = event.key === "ArrowRight" ? index + 1 : event.key === "ArrowLeft" ? index - 1 : event.key === "Home" ? 0 : event.key === "End" ? items.length - 1 : null;
     if (next !== null) { event.preventDefault(); select(next, true); }
   };
-  return <section className={`section ${s.section}`} aria-labelledby={`${id}-title`} data-testimonials ref={root} onPointerEnter={event => { if (event.pointerType === "mouse") setHovered(true); }} onPointerLeave={() => setHovered(false)} onFocusCapture={event => setKeyboardFocused(event.target.matches(":focus-visible"))} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setKeyboardFocused(false); }}>
+  return <section className={`section ${s.section}`} aria-labelledby={`${id}-title`} data-testimonials ref={root} onFocusCapture={event => setKeyboardFocused(event.target.matches(":focus-visible"))} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setKeyboardFocused(false); }}>
     <div className={`container ${s.layout}`}>
       <div className={s.heading}>
         <h2 id={`${id}-title`}>In their own words.</h2>
