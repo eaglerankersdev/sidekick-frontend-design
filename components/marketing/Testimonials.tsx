@@ -9,7 +9,9 @@ export type Testimonial = { id: string; quote: string; name: string; role: strin
 export function Testimonials({ items, preview = false }: { items: Testimonial[]; preview?: boolean }) {
   const [selected, setSelected] = useState(0);
   const [groupSize, setGroupSize] = useState(3);
-  const [paused, setPaused] = useState(false);
+  const [pageHidden, setPageHidden] = useState(false);
+  const [keyboardFocused, setKeyboardFocused] = useState(false);
+  const [interaction, setInteraction] = useState(0);
   const [hovered, setHovered] = useState(false);
   const [visible, setVisible] = useState(false);
   const [reduced, setReduced] = useState(false);
@@ -24,23 +26,24 @@ export function Testimonials({ items, preview = false }: { items: Testimonial[];
     update(); query.addEventListener("change", update);
     const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), { threshold: .25 });
     if (root.current) observer.observe(root.current);
-    const visibility = () => { if (document.hidden) setPaused(true); };
+    const visibility = () => setPageHidden(document.hidden);
+    visibility();
     document.addEventListener("visibilitychange", visibility);
     return () => { mobile.removeEventListener("change", updateGroup); observer.disconnect(); query.removeEventListener("change", update); document.removeEventListener("visibilitychange", visibility); };
   }, []);
-  const playing = !paused && !hovered && visible && !reduced && items.length > 1;
+  const playing = !pageHidden && !keyboardFocused && !hovered && visible && !reduced && items.length > 1;
   useEffect(() => {
     if (!playing) return;
     const timer = setTimeout(() => setSelected(value => (value + 1) % items.length), 6500);
     return () => clearTimeout(timer);
-  }, [selected, playing, items.length]);
+  }, [selected, playing, items.length, interaction]);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
   const touch = useRef<{ x: number; y: number } | null>(null);
   if (!items.length) return null;
   const index = Math.min(selected, items.length - 1);
   const select = (next: number, focus = false) => {
     const normalized = (next + items.length) % items.length;
-    setPaused(true);
+    setInteraction(value => value + 1);
     setSelected(normalized);
     if (focus) requestAnimationFrame(() => tabs.current[normalized]?.focus({ preventScroll: true }));
   };
@@ -48,7 +51,7 @@ export function Testimonials({ items, preview = false }: { items: Testimonial[];
     const next = event.key === "ArrowRight" ? index + 1 : event.key === "ArrowLeft" ? index - 1 : event.key === "Home" ? 0 : event.key === "End" ? items.length - 1 : null;
     if (next !== null) { event.preventDefault(); select(next, true); }
   };
-  return <section className={`section ${s.section}`} aria-labelledby={`${id}-title`} data-testimonials ref={root} onPointerEnter={event => { if (event.pointerType === "mouse") setHovered(true); }} onPointerLeave={() => setHovered(false)} onFocusCapture={() => setPaused(true)}>
+  return <section className={`section ${s.section}`} aria-labelledby={`${id}-title`} data-testimonials ref={root} onPointerEnter={event => { if (event.pointerType === "mouse") setHovered(true); }} onPointerLeave={() => setHovered(false)} onFocusCapture={event => setKeyboardFocused(event.target.matches(":focus-visible"))} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setKeyboardFocused(false); }}>
     <div className={`container ${s.layout}`}>
       <div className={s.heading}>
         <h2 id={`${id}-title`}>In their own words.</h2>
@@ -59,7 +62,7 @@ export function Testimonials({ items, preview = false }: { items: Testimonial[];
         const point = event.changedTouches[0];
         const dx = point.clientX - touch.current.x, dy = point.clientY - touch.current.y;
         touch.current = null;
-        if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.5) { setPaused(true); select(index + (dx < 0 ? 1 : -1)); }
+        if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.5) { select(index + (dx < 0 ? 1 : -1)); }
       }}>
         <Quote className={s.quoteMark} aria-hidden />
         <div className={s.slides}>
