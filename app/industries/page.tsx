@@ -1,3 +1,4 @@
+import { ResponsiveCarousel } from "@/components/marketing/ResponsiveCarousel";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -47,7 +48,7 @@ export default function IndustriesPage() {
       {/* 1. Five featured industries */}
       <section className="section section--white" id="industries" style={{ paddingTop: 40 }}>
         <div className="container">
-          <div className={`grid grid--3 ${s.cards}`} data-reveal-stagger>
+          <ResponsiveCarousel className={`grid grid--3 ${s.cards}`} label="Industries">
             {industries.map((ind) => (
               <Link key={ind.slug} href={`/industries/${ind.slug}`} className={`card card--hover ${s.card}`}>
                 <div className={s.cardPhoto} aria-hidden>
@@ -72,7 +73,7 @@ export default function IndustriesPage() {
                 Talk to us <ArrowRight aria-hidden />
               </Link>
             </div>
-          </div>
+          </ResponsiveCarousel>
         </div>
       </section>
 
