@@ -318,7 +318,7 @@ export default function HomePage() {
       </section>
 
       {/* 10. Final navy CTA */}
-      <CTASection
+      <CTASection illustrated
         title="Every great business deserves a SideKick."
         body="See the whole workflow with your services and your team in mind."
         primary={{ label: "Book a Demo", href: "/contact" }}
