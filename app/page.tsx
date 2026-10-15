@@ -1,3 +1,4 @@
+import { ResponsiveCarousel } from "@/components/marketing/ResponsiveCarousel";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -288,7 +289,7 @@ export default function HomePage() {
               shared across all of them.
             </p>
           </div>
-          <div className={s.workspaces} data-reveal-stagger>
+          <ResponsiveCarousel className={s.workspaces} label="Service workspaces">
             {plans.map((p) => (
               <div key={p.key} className={`card card--hover ${s.wsCard} ${p.featured ? s.wsFeatured : ""}`}>
                 <span className={s.wsCount}>{p.workspaces}</span>
@@ -306,7 +307,7 @@ export default function HomePage() {
                 </span>
               </div>
             ))}
-          </div>
+          </ResponsiveCarousel>
           <div className={s.plansCta} data-reveal>
             <Link href="/pricing" className="btn btn--ghost">
               View plans <ArrowRight aria-hidden />
