@@ -357,3 +357,41 @@
   .heroIntro { max-width: 36ch; }
   .ctaCard { padding: 36px 20px; }
 }
+
+/* Service tools frame the invitation; the center remains reserved for reading. */
+.ctaIllustrated.ctaCard { padding: 88px 24px 0; }
+.ctaIllustrated h2 { position: relative; max-width: 640px; }
+.ctaIllustrated p { position: relative; max-width: 540px; }
+.ctaIllustrated :global(.btn-row) { position: relative; margin-bottom: 72px; }
+.ctaVectors { position: absolute; inset: 0; pointer-events: none; }
+.ctaVectors span { position: absolute; display: grid; place-items: center; width: 80px; height: 80px; color: var(--light-blue); background: rgb(255 255 255 / .04); border: 1px solid rgb(185 205 234 / .2); border-radius: 18px; rotate: -12deg; }
+.ctaVectors svg { width: 38px; height: 38px; stroke-width: 1.4; }
+.ctaVectors span:nth-child(1) { top: 56px; left: 7%; }
+.ctaVectors span:nth-child(2) { top: 62px; right: 7%; rotate: 12deg; }
+.ctaVectors span:nth-child(3) { bottom: 110px; left: 14%; rotate: 8deg; }
+.ctaVectors span:nth-child(4) { bottom: 110px; right: 14%; rotate: -8deg; }
+.ctaWorkflow { position: relative; display: flex; justify-content: center; align-items: center; gap: clamp(16px, 3vw, 48px); padding: 24px; margin-inline: -24px; background: rgb(255 255 255 / .055); color: var(--ice); }
+.ctaWorkflow span { display: flex; gap: 10px; align-items: center; font-size: .95rem; font-weight: 600; }
+.ctaWorkflow span svg { width: 20px; height: 20px; color: var(--light-blue); }
+.ctaWorkflow > svg { width: 16px; height: 16px; color: var(--light-blue); opacity: .6; }
+@media (prefers-reduced-motion: no-preference) {
+  .ctaVectors span { animation: service-drift 7s ease-in-out infinite alternate; }
+  .ctaVectors span:nth-child(even) { animation-delay: -3s; }
+  @keyframes service-drift { from { translate: 0 0; } to { translate: 0 -10px; } }
+}
+@media (max-width: 1050px) {
+  .ctaIllustrated.ctaCard { padding-top: 130px; }
+  .ctaVectors { inset: 30px 0 auto; display: flex; justify-content: center; gap: 28px; }
+  .ctaVectors span:nth-child(n) { position: relative; inset: auto; width: 56px; height: 56px; }
+  .ctaVectors svg { width: 28px; height: 28px; }
+  .ctaIllustrated :global(.btn-row) { margin-bottom: 40px; }
+}
+@media (max-width: 600px) {
+  .ctaIllustrated.ctaCard { padding: 116px 20px 0; }
+  .ctaVectors { gap: 20px; }
+  .ctaVectors span:nth-child(n) { width: 44px; height: 44px; border-radius: 12px; }
+  .ctaVectors svg { width: 24px; height: 24px; }
+  .ctaWorkflow { margin-inline: -20px; padding: 22px 12px; gap: 9px; justify-content: space-between; }
+  .ctaWorkflow span { flex-direction: column; gap: 8px; font-size: .75rem; }
+  .ctaWorkflow > svg { width: 12px; flex: none; }
+}
