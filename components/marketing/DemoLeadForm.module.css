@@ -106,8 +106,8 @@
 .field select:focus,
 .field textarea:focus {
   outline: none;
-  border-color: var(--cobalt);
-  box-shadow: 0 0 0 4px rgb(0 98 253 / 0.14);
+  border-color: var(--navy);
+  box-shadow: none;
 }
 .fieldError input,
 .fieldError select,
