@@ -319,12 +319,13 @@
   .heroCopy { display: contents; }
   .heroInner { gap: 16px; }
   .heroIntro { display: block; grid-row: 1; text-align: center; }
-  .heroVisual { order: 0; grid-row: 2; padding-top: 54px; }
+  .heroVisual { order: 0; grid-row: 2; padding-top: 54px; padding-bottom: 24px; }
   .heroControls { display: block; grid-row: 3; text-align: center; }
   .heroCopy :global(.lead) { margin-bottom: 0; }
   .mascot { width: 72px; }
   .heroLabel { display: none; }
-  .heroOrbit { inset: 30px -6px -8px; }
+  .heroOrbit { inset: 30px -6px 18px; }
+  .heroControls :global(.btn-row) { gap: 12px; }
 }
 @media (max-width: 600px) and (max-height: 700px) {
   .hero { padding-top: 12px; }
