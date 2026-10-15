@@ -70,6 +70,9 @@
   border-radius: 50%;
   background: var(--border-strong);
 }
+.dots i:nth-child(1) { background: #ff5f57; }
+.dots i:nth-child(2) { background: #febc2e; }
+.dots i:nth-child(3) { background: #28c840; }
 .url {
   flex: 1;
   max-width: 320px;
