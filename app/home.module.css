@@ -335,3 +335,10 @@
   .heroVisual { padding-top: 44px; }
   .mascot { width: 60px; }
 }
+
+/* Independent translation preserves the original phone/backdrop rotation.
+   No scaling, pinning, clipping, or changes to the workspace's contents. */
+.hero [data-hero-layer] { translate: 0 var(--hero-depth-y, 0px); }
+@media (prefers-reduced-motion: reduce) {
+  .hero [data-hero-layer] { translate: none; }
+}
