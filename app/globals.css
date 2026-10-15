@@ -166,6 +166,14 @@ ol[role="list"] {
   outline-offset: 3px;
   border-radius: 6px;
 }
+/* Text fields use their border as the focus indicator, without an outer ring. */
+input:not([type="checkbox"]):not([type="radio"]):focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--navy);
+  box-shadow: none;
+}
 .skip-link {
   position: fixed;
   left: 16px;
