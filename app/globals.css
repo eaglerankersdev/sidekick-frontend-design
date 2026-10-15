@@ -301,7 +301,8 @@ ol[role="list"] {
   transition:
     transform 0.25s var(--ease-out),
     box-shadow 0.25s var(--ease-out),
-    background-color 0.2s;
+    background-color 0.2s,
+    color 0.2s;
 }
 .btn svg {
   width: 18px;
@@ -312,22 +313,10 @@ ol[role="list"] {
 .btn--primary {
   box-shadow: var(--shadow-cobalt);
 }
-.btn--primary::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(110deg, transparent 20%, rgb(255 255 255 / 0.28) 50%, transparent 80%);
-  transform: translateX(-120%);
-  transition: transform 0.7s var(--ease-out);
-}
 .btn--primary:hover {
   background: var(--cobalt-hover);
   transform: translateY(-2px);
   box-shadow: 0 16px 36px -12px rgb(0 98 253 / 0.65);
-}
-.btn--primary:hover::after {
-  transform: translateX(120%);
 }
 .btn:hover svg {
   transform: translateX(3px);
@@ -653,3 +642,19 @@ input, textarea { caret-color: var(--cobalt); }
 /* Brand ink for primary reading; muted blue remains for metadata. */
 .section-head p, .lead { color: var(--navy); }
 .section--navy .lead { color: var(--ice); }
+
+/* Clear click affordances, with a separate disabled state. */
+:where(a[href], button:not(:disabled), summary, [role="button"], [role="tab"], select) {
+  cursor: pointer;
+}
+button:disabled, [aria-disabled="true"] { cursor: not-allowed; }
+@media (hover: hover) and (pointer: fine) {
+  .btn--ghost:hover, .btn--light:hover {
+    background-color: var(--ice);
+    color: var(--cobalt);
+  }
+  .btn--outline-light:hover {
+    background-color: var(--white);
+    color: var(--navy);
+  }
+}
