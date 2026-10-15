@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Users, ShieldCheck, Sparkles, Globe, FileSignature, Check, BriefcaseBusiness, Palette, Play, CalendarCheck, Inbox } from "lucide-react";
 import { MCPConnections } from "@/components/marketing/MCPConnections";
+import { HeroParallax } from "@/components/marketing/HeroParallax";
 import { HeroField } from "@/components/marketing/HeroField";
 import { HeroMascot } from "@/components/marketing/HeroMascot";
 import { WorkflowJourney } from "@/components/marketing/WorkflowJourney";
@@ -24,10 +25,10 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <>
-      <section className={s.hero}>
+      <HeroParallax className={s.hero}>
         <div className={s.heroBg} aria-hidden><HeroField /></div>
         <div className={`container ${s.heroInner}`}>
-          <div className={s.heroCopy}>
+          <div className={s.heroCopy} data-hero-layer="copy">
             <div className={s.heroIntro}>
             <span className={s.kicker}>Less admin. More jobs done.</span>
             <h1>Your business.<br /><span>Your SideKick.</span></h1>
@@ -46,17 +47,17 @@ export default function HomePage() {
             </div>
           </div>
           <div className={s.heroVisual}>
-            <div className={s.heroOrbit} aria-hidden />
-            <div className={s.heroBrowser}>
+            <div className={s.heroOrbit} data-hero-layer="backdrop" aria-hidden />
+            <div className={s.heroBrowser} data-hero-layer="workspace">
               <HeroMascot className={s.mascot} />
               <Browser url="Your SideKick workspace"><DashboardMock mobilePreview /></Browser>
             </div>
-            <div className={s.heroPhone}><Phone><JobPhoneMock /></Phone></div>
-            <div className={s.heroState}><span><CalendarCheck aria-hidden /></span><div><strong>Next stop: a job well done.</strong><small>From request to scheduled work</small></div></div>
+            <div className={s.heroPhone} data-hero-layer="phone"><Phone><JobPhoneMock /></Phone></div>
+            <div className={s.heroState} data-hero-layer="status"><span><CalendarCheck aria-hidden /></span><div><strong>Next stop: a job well done.</strong><small>From request to scheduled work</small></div></div>
             <span className={s.heroLabel}><PreviewLabel /></span>
           </div>
         </div>
-      </section>
+      </HeroParallax>
       <IndustryMarquee items={industries.map(ind => ({ name: ind.navName, icon: ind.icon }))} />
       <div className={`container ${s.audiences}`}>
         <Link href="/features"><BriefcaseBusiness aria-hidden /><span><strong>I run a service business</strong><small>Less admin. More time for the work.</small></span><ArrowRight aria-hidden /></Link>
