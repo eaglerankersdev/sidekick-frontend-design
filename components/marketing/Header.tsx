@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, Menu, X, ArrowRight, Network } from "lucide-react";
+import { ChevronDown, ArrowRight, Network } from "lucide-react";
 import { productNav, industryNav, mainNav, solutionNav, LOGIN_URL, type NavLink } from "@/content/navigation";
 import { NavIcon } from "./NavIcon";
 import { HomeLink } from "./HomeLink";
@@ -162,14 +162,14 @@ export function Header() {
         <div className={s.actions}>
           {LOGIN_URL && <a href={LOGIN_URL} className={s.login}>Log in</a>}
           <Link href="/contact" className={`btn btn--primary btn--sm ${s.demo}`}>Book a Demo <ArrowRight aria-hidden /></Link>
-          <button ref={burger} type="button" className={s.burger} aria-expanded={mobileOpen} aria-controls="mobile-menu" aria-label="Open menu" onClick={() => setMobileOpen(true)}><Menu aria-hidden /></button>
+          <button ref={burger} type="button" className={s.burger} aria-expanded={mobileOpen} aria-controls="mobile-menu" aria-label="Open menu" onClick={() => setMobileOpen(true)}><MenuIcon open={mobileOpen} /></button>
         </div>
       </div>
       <dialog ref={dialog} id="mobile-menu" className={s.sheet} aria-label="Navigation menu"
         onCancel={() => setMobileOpen(false)} onClose={() => { setMobileOpen(false); burger.current?.focus({ preventScroll: true }); }}
         onClick={(e) => { if (e.target === e.currentTarget) setMobileOpen(false); }}>
         <div className={s.sheetContent}>
-          <div className={s.sheetTop}><HomeLink onClick={() => setMobileOpen(false)} aria-label="SideKick CRM home"><Image src="/brand/sidekick-crm-logo.png" alt="SideKick CRM" width={2048} height={778} sizes="154px" /></HomeLink><button ref={closeButton} autoFocus type="button" className={s.burger} aria-label="Close menu" onClick={() => setMobileOpen(false)}><X aria-hidden /></button></div>
+          <div className={s.sheetTop}><HomeLink onClick={() => setMobileOpen(false)} aria-label="SideKick CRM home"><Image src="/brand/sidekick-crm-logo.png" alt="SideKick CRM" width={2048} height={778} sizes="154px" /></HomeLink><button ref={closeButton} autoFocus type="button" className={s.burger} aria-label="Close menu" onClick={() => setMobileOpen(false)}><MenuIcon open={mobileOpen} /></button></div>
           <nav aria-label="Mobile" className={s.sheetNav}>
             {menus.map((menu) => <details key={menu.key} className={s.acc} name="mobile-navigation">
               <summary>{menu.label}<ChevronDown aria-hidden /></summary>
@@ -194,4 +194,8 @@ function MenuLink({ item, onClick, pathname }: { item: NavLink; onClick: () => v
     <span className={s.panelIcon}><NavIcon name={item.icon} /></span>
     <span><span className={s.panelLabel}>{item.label}</span>{item.description && <span className={s.panelDesc}>{item.description}</span>}</span>
   </Link>;
+}
+
+function MenuIcon({ open }: { open: boolean }) {
+  return <span className={s.menuGlyph} data-open={open} aria-hidden="true"><i /><i /><i /></span>;
 }
