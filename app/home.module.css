@@ -310,7 +310,7 @@
   .audiences strong { font-size: .88rem; }
   .audiences small { font-size: .75rem; }
   .industryHeading { gap: 20px; margin-bottom: 24px; }
-  .neighborhood { max-height: 220px; object-fit: cover; }
+  .neighborhood { height: auto; }
 }
 
 /* Mobile reading order: introduction, preview, then actions. */
