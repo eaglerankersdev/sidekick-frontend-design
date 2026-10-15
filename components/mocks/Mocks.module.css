@@ -1030,7 +1030,11 @@
 }
 .aiBtns {
   display: flex;
-  gap: 4px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
 }
 .aiBtns i {
   display: inline-flex;
@@ -1242,9 +1246,10 @@
 .aiBtns button:hover { background: var(--ice); }
 .aiBtns button:active { transform: scale(.97); }
 .aiBtns .aiAccept { color: var(--ok); background: var(--ok-bg); }
-.aiRow { min-height: 76px; flex-wrap: wrap; gap: 10px; }
+.aiRow { min-height: 76px; min-width: 0; flex-wrap: wrap; gap: 10px; padding: 12px; border-radius: 8px; }
+.aiRow > span:first-child { min-width: 0; overflow-wrap: anywhere; }
 .aiRow[data-state="accepted"] { background: var(--ok-bg); }
-.aiResult { font-size: .78rem; color: var(--navy); }
+.aiResult { font-size: .78rem; line-height: 1.5; color: var(--navy); }
 .aiEdit { display: flex; gap: 8px; width: 100%; }
 .aiEdit input { min-width: 0; width: 100%; border: 1px solid var(--border-strong); border-radius: 8px; padding: 8px; background: var(--white); }
 .aiEdit button { min-height: 44px; padding: 8px 12px; color: var(--cobalt); font-weight: 700; }
