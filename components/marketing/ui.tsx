@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { ArrowRight, Check, Info, ChevronRight, Paintbrush, Droplets, Layers, ClipboardList, FileSignature, CalendarCheck, CircleCheck } from "lucide-react";
+import { ArrowRight, Check, Info, ChevronRight } from "lucide-react";
 import { STATUS_LABEL, statusOf, type FeatureKey, type FeatureStatus } from "@/content/feature-availability";
-import { TowTruck } from "./NavIcon";
 import styles from "./ui.module.css";
 
 /* ---------- FeatureStatus badge (reads from the central availability file) ---------- */
@@ -70,9 +69,7 @@ export function CTASection({
   body = "See the workflow on your own screen, with your services and your team in mind.",
   primary = { label: "Book a Demo", href: "/contact" },
   secondary,
-  illustrated = false,
 }: {
-  illustrated?: boolean;
   title?: string;
   body?: string;
   primary?: { label: string; href: string };
@@ -81,10 +78,7 @@ export function CTASection({
   return (
     <section className={`section ${styles.cta}`}>
       <div className="container">
-        <div className={`${styles.ctaCard} ${illustrated ? styles.ctaIllustrated : ""}`} data-reveal="scale" data-cta-illustrated={illustrated || undefined}>
-          {illustrated && <div className={styles.ctaVectors} aria-hidden="true">
-            <span><Paintbrush /></span><span><TowTruck /></span><span><Droplets /></span><span><Layers /></span>
-          </div>}
+        <div className={styles.ctaCard} data-reveal="scale">
           <div className={styles.ctaOrbA} data-scroll-orb aria-hidden />
           <div className={styles.ctaOrbB} data-scroll-orb aria-hidden />
           <div className={styles.ctaGrid} aria-hidden />
@@ -100,12 +94,6 @@ export function CTASection({
               </Link>
             )}
           </div>
-          {illustrated && <div className={styles.ctaWorkflow} aria-label="Your connected workflow">
-            <span><ClipboardList aria-hidden />Request</span><ArrowRight aria-hidden />
-            <span><FileSignature aria-hidden />Quote</span><ArrowRight aria-hidden />
-            <span><CalendarCheck aria-hidden />Job</span><ArrowRight aria-hidden />
-            <span><CircleCheck aria-hidden />Payment</span>
-          </div>}
         </div>
       </div>
     </section>
