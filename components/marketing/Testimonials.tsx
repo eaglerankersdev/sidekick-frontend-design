@@ -81,9 +81,7 @@ export function Testimonials({ items, preview = false }: { items: Testimonial[];
       </div>
       <div role="tablist" aria-label="Customer testimonials" className={s.tabs} onKeyDown={onKey}>
         {items.map((item, i) => <button key={item.id} ref={el => { tabs.current[i] = el; }} type="button" role="tab" hidden={Math.floor(i / groupSize) !== Math.floor(index / groupSize)} id={`${id}-tab-${i}`} aria-controls={`${id}-panel-${i}`} aria-selected={index === i} tabIndex={index === i ? 0 : -1} onClick={() => select(i)}>
-          <span className={s.tabAvatar} aria-hidden>{item.portrait ? <img src={item.portrait} alt="" width={38} height={38} loading="lazy" /> : <UserRound />}</span>
           <span><strong>{item.name}</strong><small>{item.company}</small></span>
-          <ArrowRight className={s.tabArrow} aria-hidden />
         </button>)}
       </div>
       <div className={s.groups} aria-label="Testimonial groups">
