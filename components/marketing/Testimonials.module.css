@@ -11,10 +11,10 @@
 .slide blockquote { margin: 0; }
 .slide blockquote p { font-size: clamp(1.35rem, 2.65vw, 2.25rem); font-weight: 600; line-height: 1.5; letter-spacing: -.025em; max-width: 48ch; color: var(--navy); overflow-wrap: anywhere; }
 .author { display: flex; align-items: center; gap: 14px; margin-top: 32px; }
-.avatar, .tabAvatar { display: grid; place-items: center; flex: none; background: var(--ice); color: var(--cobalt); border-radius: 50%; overflow: hidden; }
+.avatar { display: grid; place-items: center; flex: none; background: var(--ice); color: var(--cobalt); border-radius: 50%; overflow: hidden; }
 .avatar { width: 52px; height: 52px; }
 .avatar svg { width: 24px; }
-.avatar img, .tabAvatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
 .author strong { display: block; font-size: 1rem; }
 .author span { display: block; font-size: .875rem; color: var(--muted-strong); margin-top: 4px; }
 .controls { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 28px; }
@@ -26,35 +26,29 @@
 .arrows button:hover:not(:disabled) { background: var(--cobalt); color: var(--white); }
 .arrows button:active:not(:disabled) { transform: scale(.96); }
 .arrows button:disabled { opacity: .4; }
-.tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 20px; }
-.tabs button { display: flex; align-items: center; gap: 12px; padding: 22px 20px; min-height: 88px; border-radius: 14px; text-align: left; background: var(--canvas); color: var(--navy); transition: background-color .2s, color .2s; }
-.tabs button:hover { background: var(--ice); }
-.tabs button[aria-selected="true"] { background: var(--navy); color: var(--white); }
-.tabAvatar { width: 38px; height: 38px; }
-.tabAvatar svg { width: 18px; }
+/* A quiet, connected selector keeps attention on the quote. */
+.tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin-top: 28px; padding: 1px; background: var(--border); }
+.tabs button { display: grid; place-items: center; padding: 24px 16px; min-height: 96px; border-radius: 0; text-align: center; background: var(--white); color: var(--navy); transition: background-color .25s ease; }
+.tabs button:hover { background: var(--canvas); }
+.tabs button[aria-selected="true"] { background: var(--ice); }
+.tabs button > span { min-width: 0; max-width: 100%; }
 .tabs strong, .tabs small { display: block; }
-.tabs strong { font-size: .95rem; }
-.tabs small { font-size: .8rem; margin-top: 5px; }
-.tabArrow { width: 18px; flex: none; margin-left: auto; opacity: 0; transform: translateX(-4px); transition: opacity .2s, transform .2s; }
-.tabs button[aria-selected="true"] .tabArrow { opacity: 1; transform: none; }
+.tabs strong { font-size: .95rem; font-weight: 600; }
+.tabs small { font-size: .8rem; margin-top: 6px; color: var(--muted-strong); }
 @media (max-width: 700px) {
   .heading { margin-bottom: 24px; }
   .stage { padding: 24px 20px; border-radius: 18px; }
   .quoteMark { width: 30px; height: 30px; margin-bottom: 18px; }
   .author { margin-top: 24px; gap: 12px; }
   .author span { line-height: 1.5; }
-  .tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
-  .tabs button { min-height: 60px; padding: 12px 20px; border-radius: 999px; gap: 8px; }
+  .tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; margin-top: 20px; }
+  .tabs button { min-height: 80px; padding: 16px 10px; }
   .tabs strong { font-size: .82rem; }
-  .tabs button > span:nth-child(2) { flex: 1; }
   .tabs small { font-size: .72rem; }
-  .tabAvatar { display: none; }
-  .tabArrow { width: 14px; }
   .slide blockquote p { font-size: 1.25rem; line-height: 1.55; }
-  .tabArrow { opacity: .5; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .slide, .tabArrow, .arrows button { transform: none; transition: none; }
+  .slide, .tabs button, .arrows button { transform: none; transition: none; }
 }
 
 .tabs button[hidden] { display: none; }
@@ -65,7 +59,6 @@
 @keyframes quote-arrive { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: translateX(0); } }
 @media (prefers-reduced-motion: reduce) { .slide[data-active="true"] { animation: none; } }
 @media (max-width: 700px) {
-  .tabs button > span:nth-child(2) { min-width: 0; }
   .tabs small { font-size: .75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tabs strong { white-space: nowrap; }
 }
