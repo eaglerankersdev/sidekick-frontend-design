@@ -6,7 +6,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sidekickcrm.exampl
 const routes = [
   "/", "/features", "/features/ai-mcp", "/features/website-builder", "/features/quotes-proposals", "/features/jobs-scheduling", "/features/mobile-app",
   "/industries", "/industries/pressure-washing", "/industries/concrete-sealing", "/industries/towing", "/industries/junk-removal", "/industries/painting",
-  "/pricing", "/white-label", "/integrations", "/about", "/contact",
+  "/pricing", "/white-label", "/integrations", "/integrations/mcp", "/about", "/contact",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

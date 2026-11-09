@@ -29,7 +29,7 @@ export const featureAvailability = {
   aiOnboarding: "in-development",
   aiPricingAssist: "in-development",
   aiDocumentAssist: "planned",
-  mcp: "planned",
+  mcp: "in-development",
 
   proposalEditor: "in-development",
   eSignature: "in-development",

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/integrations" },
 };
 
-type Card = { icon: React.ReactNode; title: string; body: string; feature: FeatureKey; points: string[]; brands?: Brand[]; docs?: string };
+type Card = { icon: React.ReactNode; title: string; body: string; feature: FeatureKey; points: string[]; brands?: Brand[]; docs?: string; guide?: string };
 
 const cards: Card[] = [
   {
@@ -48,9 +48,10 @@ const cards: Card[] = [
   {
     icon: <BrandLogo brand="mcp" />,
     title: "MCP connections",
-    body: "Secure backend AI tools, subject to your permissions, described only when actually supported.",
+    body: "Connect Claude, ChatGPT, Claude Code or Cursor to the workspaces you choose. Your SideKick permissions apply on every request.",
     feature: "mcp",
-    points: ["Approved CRM actions only", "Backend-held credentials", "Usage limits"],
+    points: ["You sign in on your own SideKick page", "Read only, unless you allow prepared changes", "Disconnect anytime in Settings"],
+    guide: "/integrations/mcp",
   },
 ];
 
@@ -98,6 +99,11 @@ export default function IntegrationsPage() {
                     </li>
                   ))}
                 </ul>
+                {c.guide && (
+                  <Link href={c.guide} className="text-link" style={{ marginTop: 14 }}>
+                    Connection guide <ArrowRight aria-hidden />
+                  </Link>
+                )}
                 {c.docs && statusOf(c.feature) === "available" && (
                   <a href={c.docs} className="text-link" style={{ marginTop: 14 }}>
                     Documentation <ArrowRight aria-hidden />
