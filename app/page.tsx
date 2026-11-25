@@ -15,7 +15,7 @@ import { industries } from "@/content/industries";
 import { IndustryMarquee } from "@/components/marketing/IndustryMarquee";
 import { Testimonials } from "@/components/marketing/Testimonials";
 import { demoTestimonials } from "@/content/testimonials";
-import { plans } from "@/content/pricing";
+import { planCopy as plans } from "@/content/pricing";
 import s from "./home.module.css";
 
 export const metadata: Metadata = {
@@ -303,7 +303,7 @@ export default function HomePage() {
                   ))}
                 </div>
                 <span className="muted" style={{ fontSize: "0.85rem" }}>
-                  {p.nameConfirmed ? p.name : "Plan name to be confirmed"}
+                  {p.name}
                 </span>
               </div>
             ))}
@@ -312,7 +312,7 @@ export default function HomePage() {
             <Link href="/pricing" className="btn btn--ghost">
               View plans <ArrowRight aria-hidden />
             </Link>
-            <span className="muted">Pricing is shared during your demo until public checkout is approved.</span>
+            <span className="muted">See monthly prices and what each plan includes.</span>
           </div>
         </div>
       </section>
