@@ -56,6 +56,14 @@ export default async function PricingPage() {
               <Info aria-hidden /> Live prices are unavailable right now. Talk to sales and we will share current pricing.
             </p>
           )}
+          {pricing && (
+            <p className="mt-2 text-[0.95rem] text-muted">
+              Already a SideKick customer?{" "}
+              <Link href="/checkout/upgrade" className="inline-flex min-h-11 items-center font-bold text-cobalt underline-offset-4 hover:underline">
+                Upgrade your plan
+              </Link>
+            </p>
+          )}
           <AddOns pricing={pricing} />
         </div>
       </section>

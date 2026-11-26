@@ -3,6 +3,7 @@
 import { randomUUID } from "node:crypto";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { addonsPayload, parseAddons } from "@/lib/addons";
 import { EMAIL, UUID } from "@/lib/inquiry";
 import { parsePlanKey } from "@/lib/pricing";
 import {
@@ -26,6 +27,7 @@ export async function startCheckout(_prev: CheckoutState, formData: FormData): P
   const phone = field("phone");
   const businessName = field("businessName");
   const acceptTerms = formData.get("acceptTerms") === "on";
+  const addons = addonsPayload(parseAddons(formData));
   const sentKey = field("idempotencyKey");
   const idempotencyKey = UUID.test(sentKey) ? sentKey : randomUUID();
 
@@ -57,7 +59,7 @@ export async function startCheckout(_prev: CheckoutState, formData: FormData): P
         "Idempotency-Key": idempotencyKey,
         ...(clientIp ? { "x-sidekick-client-ip": clientIp } : {}),
       },
-      body: JSON.stringify({ planKey, name, email, phone, businessName, acceptTerms: true }),
+      body: JSON.stringify({ planKey, name, email, phone, businessName, acceptTerms: true, ...(addons ? { addons } : {}) }),
       cache: "no-store",
       signal: AbortSignal.timeout(15_000),
     });

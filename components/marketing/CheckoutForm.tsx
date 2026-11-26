@@ -3,8 +3,11 @@
 import { startTransition, useActionState, useEffect, useId, useRef, useState } from "react";
 import { AlertCircle, Check, Loader2, LockKeyhole } from "lucide-react";
 import { startCheckout } from "@/app/checkout/actions";
+import { NO_ADDONS, orderTotals, type AddonPrices, type AddonSelection } from "@/lib/addons";
 import type { CheckoutField, CheckoutState } from "@/lib/signup";
-import type { PlanKey } from "@/lib/pricing";
+import { formatMoney, type PlanKey } from "@/lib/pricing";
+import { AddOnList, CallRailAddOn, PacksAddOn, SeatsAddOn, SummaryPanel } from "./CheckoutParts";
+import { TrustNotes } from "./OrderSummary";
 import { btnPrimary } from "./tw";
 
 const initial: CheckoutState = { status: "idle" };
@@ -13,8 +16,22 @@ const input =
   "block min-h-12 w-full rounded-btn! border-[1.5px] border-line bg-white px-3.5 py-3 font-semibold text-navy transition-[border-color] duration-200 " +
   "hover:border-line-strong focus-visible:border-cobalt aria-invalid:border-danger";
 
-export function CheckoutForm({ planKey, price, idempotencyKey }: { planKey: PlanKey; price: string; idempotencyKey: string }) {
+type Props = {
+  plan: { key: PlanKey; name: string; priceMinor: number; teamMembers: number };
+  currency: string;
+  prices: AddonPrices;
+  /** The plan card at the top of the form column (server-rendered). */
+  header: React.ReactNode;
+  idempotencyKey: string;
+};
+
+export function CheckoutForm({ plan, currency, prices, header, idempotencyKey }: Props) {
+  const planKey = plan.key;
   const [state, action, pending] = useActionState(startCheckout, initial);
+  const [sel, setSel] = useState<AddonSelection>(NO_ADDONS);
+  const set = (patch: Partial<AddonSelection>) => setSel((s) => ({ ...s, ...patch }));
+  const money = (m: number) => formatMoney(m, currency);
+  const totals = orderTotals(plan, prices, sel);
   const id = useId();
   const errorRef = useRef<HTMLDivElement>(null);
   // One key per form render; replaced only when the API rejected the last request.
@@ -37,6 +54,22 @@ export function CheckoutForm({ planKey, price, idempotencyKey }: { planKey: Plan
   const attrs = (f: CheckoutField) => ({ id: `${id}-${f}`, name: f, required: true, "aria-invalid": !!err(f), "aria-describedby": describe(f), className: input });
 
   return (
+    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-x-10">
+    <SummaryPanel
+      className="lg:col-start-2 lg:row-start-1"
+      totalLabel="Due today"
+      total={money(totals.dueTodayMinor)}
+      then={`Then ${money(totals.monthlyMinor)} per month`}
+      lines={totals.lines.map((l) => ({
+        key: l.key,
+        label: l.label,
+        detail: l.detail,
+        amount: l.amountMinor === null ? "Free here" : money(l.amountMinor),
+        note: l.cadence === "month" ? "per month" : l.cadence === "once" ? "one-time" : undefined,
+      }))}
+    >
+      <TrustNotes className="mt-6" />
+    </SummaryPanel>
     <form
       action={action}
       // Dispatch manually so React keeps the typed values after a failed submit (the action prop keeps no-JS submits working).
@@ -47,12 +80,10 @@ export function CheckoutForm({ planKey, price, idempotencyKey }: { planKey: Plan
         startTransition(() => action(data));
       }}
       noValidate
-      aria-labelledby={`${id}-title`}
-      className="grid gap-6 rounded-xl bg-white p-[clamp(20px,3vw,36px)] ring-1 ring-line"
+      aria-label={`${plan.name} plan checkout`}
+      className="grid min-w-0 gap-8 lg:col-start-1 lg:row-start-1"
     >
-      <h2 id={`${id}-title`} className="text-xl">
-        Your details
-      </h2>
+      {header}
 
       {state.status === "error" && state.formError && (
         <div
@@ -76,6 +107,10 @@ export function CheckoutForm({ planKey, price, idempotencyKey }: { planKey: Plan
         </div>
       )}
 
+      <section aria-labelledby={`${id}-details`} className="grid gap-5 rounded-xl bg-white p-[clamp(20px,3vw,32px)] ring-1 ring-line">
+      <h2 id={`${id}-details`} className="text-xl">
+        Your details
+      </h2>
       <div className="grid gap-[18px] sm:grid-cols-2">
         <Field id={`${id}-name`} label="Full name" error={err("name")}>
           <input {...attrs("name")} type="text" autoComplete="name" maxLength={120} />
@@ -90,7 +125,29 @@ export function CheckoutForm({ planKey, price, idempotencyKey }: { planKey: Plan
           <input {...attrs("businessName")} type="text" autoComplete="organization" maxLength={160} />
         </Field>
       </div>
+      </section>
 
+      <section aria-labelledby={`${id}-addons`} className="grid gap-4">
+        <div>
+          <h2 id={`${id}-addons`} className="text-xl">
+            Add-ons
+          </h2>
+          <p className="mt-1 text-muted">Optional. You can also add these later in the CRM.</p>
+        </div>
+        <AddOnList>
+          <SeatsAddOn
+            prices={prices}
+            currency={currency}
+            value={sel.extraSeats}
+            onChange={(extraSeats) => set({ extraSeats })}
+            note={`Your plan includes ${plan.teamMembers.toLocaleString("en-US")} team members. Add more people now.`}
+          />
+          <PacksAddOn prices={prices} currency={currency} value={sel.creditPacks} onChange={(creditPacks) => set({ creditPacks })} />
+          <CallRailAddOn checked={sel.callRail} onChange={(callRail) => set({ callRail })} />
+        </AddOnList>
+      </section>
+
+      <div className="grid gap-5 rounded-xl bg-white p-[clamp(20px,3vw,32px)] ring-1 ring-line">
       <div>
         <label className="group flex min-h-11 cursor-pointer items-start gap-3 py-1">
           <span className="relative mt-px grid size-6 shrink-0 place-items-center">
@@ -133,9 +190,13 @@ export function CheckoutForm({ planKey, price, idempotencyKey }: { planKey: Plan
             </>
           )}
         </button>
-        <p className="text-center text-[0.88rem] text-muted">Next, you confirm the {price} monthly payment on Stripe&apos;s secure page.</p>
+        <p className="text-center text-[0.88rem] text-muted">
+          Next, you pay {money(totals.dueTodayMinor)} on Stripe&apos;s secure page, then {money(totals.monthlyMinor)} per month.
+        </p>
+      </div>
       </div>
     </form>
+    </div>
   );
 }
 

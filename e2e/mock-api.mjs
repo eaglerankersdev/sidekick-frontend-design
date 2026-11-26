@@ -3,6 +3,9 @@
 // Signups: "limit@…" → 429, "bad@…" → 400 on email, "sold@…" → 409 PLAN_UNAVAILABLE. After the mock "Stripe" page:
 // emails starting "existing" → existing_account, "fail" → failed, "expired" → expired, "slow" stays processing, others → ready
 // after two processing polls.
+// Upgrades: any email gets a 202 challenge ("limit@" → 429); code 123456 verifies, 999999 → 429, anything else → 400 CODE_INVALID.
+// Emails starting "multi" own two businesses, "nobiz" none, "sca" needs a bank check (requires_action → mock invoice page),
+// "decline" fails; others own one Basic business. A lower plan is scheduled for the renewal with an over-limit warning.
 import http from "node:http";
 import { pricing } from "./fixtures.ts";
 
@@ -11,6 +14,49 @@ const site = process.env.MOCK_SITE_URL ?? "http://127.0.0.1:3311";
 const self = `http://127.0.0.1:${port}`;
 export const received = [];
 const signups = new Map();
+const challenges = new Map();
+const accounts = new Map();
+const changes = new Map();
+const upgradeCalls = [];
+const RENEWAL = "2026-12-15T12:00:00.000Z";
+const rank = (k) => ["basic", "growth", "enterprise"].indexOf(k);
+const planOf = (k) => pricing.plans.find((p) => p.key === k);
+const biz = (businessId, name, planKey, extraSeats) => ({ businessId, name, planKey, planName: planOf(planKey).name, extraSeats, status: "active" });
+function businessesFor(email) {
+  if (email.startsWith("nobiz")) return [];
+  if (email.startsWith("multi")) return [biz("biz_1", "Brightside Washing", "basic", 0), biz("biz_2", "Clearview Towing", "enterprise", 2)];
+  if (email.startsWith("sca")) return [biz("biz_3", "Harbor Painting", "basic", 0)];
+  return [biz("biz_1", "Brightside Washing", "basic", 1)];
+}
+function quote(b, data) {
+  const cur = planOf(b.planKey);
+  const tgt = planOf(data.planKey ?? b.planKey);
+  const seats = data.extraSeats ?? b.extraSeats;
+  const packs = data.creditPacks ?? 0;
+  const later = rank(tgt.key) < rank(cur.key);
+  const lines = [];
+  if (tgt.key !== cur.key) lines.push(later ? { label: `${tgt.name} plan from your renewal`, amountMinor: 0 } : { label: `${tgt.name} plan, rest of this cycle`, amountMinor: Math.round((tgt.priceMinor - cur.priceMinor) / 2) });
+  if (seats > b.extraSeats) lines.push({ label: `${seats - b.extraSeats} extra team ${seats - b.extraSeats === 1 ? "member" : "members"}, rest of this cycle`, amountMinor: (seats - b.extraSeats) * 500 });
+  if (packs) lines.push({ label: `${packs} AI credit ${packs === 1 ? "pack" : "packs"}`, amountMinor: packs * 1000 });
+  const warnings = later ? [{ code: "OVER_LIMIT", message: `${tgt.name} includes ${tgt.teamMembers} team members. Remove extra people before your renewal or they are billed as extra members.` }] : [];
+  return {
+    lines,
+    dueNowMinor: lines.reduce((s, l) => s + l.amountMinor, 0),
+    newMonthlyMinor: tgt.priceMinor + seats * 1000,
+    currency: "usd",
+    effective: later ? "next_renewal" : "now",
+    renewalAt: RENEWAL,
+    warnings,
+    paymentMethod: { brand: "visa", last4: "4242" },
+  };
+}
+function changeStatus(c) {
+  if (c.scheduled) return { status: "scheduled", nextAction: null };
+  if (c.email.startsWith("sca") && !c.paid) return { status: "requires_action", nextAction: { kind: "pay", url: `${self}/__invoice/${c.id}` } };
+  if (c.email.startsWith("decline")) return c.polls++ < 1 ? { status: "processing", nextAction: null } : { status: "failed", nextAction: null };
+  if (!c.paid && c.polls++ < 1) return { status: "processing", nextAction: null };
+  return { status: "paid", nextAction: null };
+}
 
 const page = (title, body) =>
   `<!doctype html><meta name=viewport content="width=device-width"><title>${title}</title>` +
@@ -66,6 +112,59 @@ http
         if (!s || req.headers["x-sidekick-signup-token"] !== s.token) return send(404, { code: "SIGNUP_NOT_FOUND" });
         return send(200, { signupId: s.id, planKey: s.data.planKey, ...status(s) });
       }
+      if (req.method === "POST" && url.pathname === "/v1/public/account-codes") {
+        if (req.headers.authorization !== "Bearer test-site-token") return send(401, { code: "UNAUTHORIZED" });
+        const email = String(JSON.parse(body || "{}").email ?? "");
+        upgradeCalls.push({ path: url.pathname, headers: req.headers, data: { email } });
+        if (email.startsWith("limit@")) return send(429, { code: "RATE_LIMITED" });
+        const challengeId = `ch_${challenges.size + 1}`;
+        challenges.set(challengeId, { email });
+        return send(202, { challengeId, expiresAt: new Date(Date.now() + 10 * 60_000).toISOString() });
+      }
+      const verify = url.pathname.match(/^\/v1\/public\/account-codes\/([\w-]+)\/verify$/);
+      if (req.method === "POST" && verify) {
+        if (req.headers.authorization !== "Bearer test-site-token") return send(401, { code: "UNAUTHORIZED" });
+        const ch = challenges.get(verify[1]);
+        const code = String(JSON.parse(body || "{}").code ?? "");
+        if (code === "999999") return send(429, { code: "RATE_LIMITED" });
+        if (!ch || code !== "123456") return send(400, { code: "CODE_INVALID" });
+        const accountToken = `acct_${Math.random().toString(36).slice(2)}`;
+        accounts.set(accountToken, { email: ch.email, businesses: businessesFor(ch.email) });
+        return send(200, { accountToken, email: ch.email, businesses: accounts.get(accountToken).businesses });
+      }
+      if (req.method === "POST" && (url.pathname === "/v1/public/upgrades/preview" || url.pathname === "/v1/public/upgrades")) {
+        if (req.headers.authorization !== "Bearer test-site-token") return send(401, { code: "UNAUTHORIZED" });
+        const acct = accounts.get(req.headers["x-sidekick-account-token"]);
+        if (!acct) return send(401, { code: "ACCOUNT_TOKEN_INVALID" });
+        const data = JSON.parse(body || "{}");
+        upgradeCalls.push({ path: url.pathname, headers: req.headers, data, email: acct.email });
+        const b = acct.businesses.find((x) => x.businessId === data.businessId);
+        if (!b) return send(404, { code: "BUSINESS_NOT_FOUND" });
+        const q = quote(b, data);
+        if (url.pathname.endsWith("/preview")) return send(200, q);
+        const key = req.headers["idempotency-key"];
+        const c = [...changes.values()].find((x) => x.key === key) ?? { id: `chg_${changes.size + 1}`, key, email: acct.email, token: req.headers["x-sidekick-account-token"], scheduled: q.effective === "next_renewal", paid: false, polls: 0 };
+        changes.set(c.id, c);
+        const first = changeStatus({ ...c, polls: 0 });
+        return send(201, { changeId: c.id, ...first });
+      }
+      const changeMatch = url.pathname.match(/^\/v1\/public\/upgrades\/([\w-]+)$/);
+      if (req.method === "GET" && changeMatch) {
+        if (req.headers.authorization !== "Bearer test-site-token") return send(401, { code: "UNAUTHORIZED" });
+        const c = changes.get(changeMatch[1]);
+        if (!c || req.headers["x-sidekick-account-token"] !== c.token) return send(404, { code: "CHANGE_NOT_FOUND" });
+        return send(200, { changeId: c.id, ...changeStatus(c), crmUrl: `${self}/__crm/billing`, renewalAt: RENEWAL });
+      }
+      // Mock Stripe hosted invoice (bank check): pay marks the change paid.
+      const invoice = url.pathname.match(/^\/__invoice\/([\w-]+)(\/pay)?$/);
+      if (invoice && changes.has(invoice[1])) {
+        const c = changes.get(invoice[1]);
+        if (invoice[2]) {
+          c.paid = true;
+          return html(200, page("Mock invoice paid", "<p>You can close this tab.</p>"));
+        }
+        return html(200, page("Mock Stripe invoice", `<p><a href="/__invoice/${c.id}/pay">Pay invoice</a></p>`));
+      }
       // Mock "Stripe Checkout": pay → success URL, cancel → cancel URL.
       const stripe = url.pathname.match(/^\/__stripe\/([\w-]+)(\/pay)?$/);
       if (stripe && signups.has(stripe[1])) {
@@ -77,7 +176,8 @@ http
         }
         return html(200, page("Mock Stripe Checkout", `<p>${s.data.planKey} plan for ${s.data.email}</p><p><a href="/__stripe/${s.id}/pay">Pay</a></p><p><a href="${site}/checkout?plan=${s.data.planKey}&cancelled=1">Cancel</a></p>`));
       }
-      if (url.pathname.startsWith("/__crm/")) return html(200, page(url.pathname.endsWith("sign-in") ? "Mock CRM sign in" : "Mock CRM set password", ""));
+      if (url.pathname.startsWith("/__crm/")) return html(200, page(url.pathname.endsWith("sign-in") ? "Mock CRM sign in" : url.pathname.endsWith("billing") ? "Mock CRM billing" : "Mock CRM set password", ""));
+      if (url.pathname === "/__upgrades") return send(200, upgradeCalls);
       if (url.pathname === "/__received") return send(200, received);
       if (url.pathname === "/__signups") return send(200, [...signups.values()].map(({ token, ...s }) => s));
       send(404, { code: "NOT_FOUND" });

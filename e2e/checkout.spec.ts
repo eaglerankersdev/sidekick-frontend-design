@@ -3,6 +3,10 @@ import { expect, test, type Page } from "@playwright/test";
 // SHOTS=1 also saves the screenshots kept in docs/screenshots (converted to webp afterwards).
 async function shot(page: Page, name: string) {
   if (!process.env.SHOTS) return;
+  await page.evaluate(() => {
+    (document.activeElement as HTMLElement | null)?.blur();
+    window.scrollTo(0, 0);
+  });
   const suffix = test.info().project.name === "mobile" ? "390" : "desktop";
   await page.screenshot({ path: `docs/screenshots/${name}-${suffix}.png`, fullPage: true, animations: "disabled" });
 }
@@ -29,8 +33,8 @@ async function payWith(page: Page, email: string) {
 test("checkout shows the live plan, then pays on Stripe and forwards to set the password", async ({ page, context, request }) => {
   await page.goto("/checkout?plan=growth");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Start your Growth plan");
-  const summary = page.getByRole("complementary", { name: "Growth plan" });
-  for (const text of ["$99.99", "1,500", "$10 per month each"]) await expect(summary).toContainText(text);
+  for (const text of ["$99.99", "1,500", "$10/month each"]) await expect(page.getByRole("form")).toContainText(text);
+  await expect(page.getByRole("complementary", { name: "Order summary" })).toContainText("Due today$99.99");
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
   await shot(page, "checkout-form");
 
@@ -50,6 +54,43 @@ test("checkout shows the live plan, then pays on Stripe and forwards to set the 
   await expect(page.getByRole("link", { name: "Set your password" })).toHaveAttribute("href", "http://127.0.0.1:4999/__crm/set-password?t=mock");
   await expect(page).toHaveURL("http://127.0.0.1:4999/__crm/set-password?t=mock", { timeout: 10_000 });
   expect((await context.cookies("http://127.0.0.1:3311/checkout")).some((c) => c.name === `sk_signup_${last.id}`)).toBe(false);
+});
+
+test("add-ons update the order summary live and reach the signup", async ({ page, request }) => {
+  await page.goto("/checkout?plan=growth");
+  const seats = page.getByRole("button", { name: "Add one team member" });
+  for (let i = 0; i < 3; i++) await seats.click();
+  await page.getByRole("button", { name: "Add one credit pack" }).click();
+  await page.getByRole("button", { name: "Add one credit pack" }).click();
+  await page.getByRole("switch", { name: /CallRail/ }).check();
+  await expect(page.getByLabel("Extra team members")).toHaveValue("3");
+
+  const summary = page.getByRole("complementary", { name: "Order summary" });
+  await expect(summary).toContainText("3 extra team members");
+  await expect(summary).toContainText("2 AI credit packs2,000 credits");
+  await expect(summary).toContainText("CallRail call tracking");
+  await expect(summary.locator("[aria-live]")).toHaveText("Due today$149.99Then $129.99 per month");
+  if (test.info().project.name === "mobile") {
+    const toggle = page.getByRole("button", { name: /Show order summary/ });
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+    await toggle.click();
+    await expect(summary.getByText("Due today")).toBeVisible();
+  }
+
+  // Typing works too, and stays within the limit.
+  await page.getByLabel("AI credit packs").fill("35");
+  await expect(page.getByLabel("AI credit packs")).toHaveValue("20");
+  await page.getByLabel("AI credit packs").fill("2");
+  await page.getByRole("button", { name: "Remove one team member" }).click();
+  await expect(summary.locator("[aria-live]")).toHaveText("Due today$139.99Then $119.99 per month");
+  await shot(page, "checkout-addons");
+
+  const email = unique("addons");
+  await fillCheckout(page, email);
+  await page.getByRole("button", { name: "Continue to payment" }).click();
+  await expect(page).toHaveURL(/__stripe\/su_\d+$/);
+  const last = (await (await request.get("http://127.0.0.1:4999/__signups")).json()).find((s: { data: { email: string } }) => s.data.email === email);
+  expect(last.data.addons).toEqual({ extraSeats: 2, creditPacks: 2, callRail: true });
 });
 
 test("ready state, captured before the auto-forward", async ({ page }) => {

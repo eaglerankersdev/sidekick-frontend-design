@@ -12,5 +12,6 @@ export const pricing = {
     plan("enterprise", "Enterprise", 14999, 3, 2500, 10, 10, "dedicated", core),
   ],
   topUp: { credits: 1000, priceMinor: 1000 },
+  addons: { extraMember: { priceMinor: 1000, interval: "month" }, creditPack: { credits: 1000, priceMinor: 1000 } },
 };
 
