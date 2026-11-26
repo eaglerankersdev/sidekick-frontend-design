@@ -11,6 +11,7 @@ import {
   FIELD_MESSAGES,
   SIGNUP_COOKIE_MAX_AGE,
   SIGNUP_COOKIE_PATH,
+  CLIENT_SECRET,
   createdSchema,
   issueFields,
   safeRedirectUrl,
@@ -30,6 +31,8 @@ export async function startCheckout(_prev: CheckoutState, formData: FormData): P
   const addons = addonsPayload(parseAddons(formData));
   const sentKey = field("idempotencyKey");
   const idempotencyKey = UUID.test(sentKey) ? sentKey : randomUUID();
+  // The page asks for embedded Checkout only when the API has a publishable key; otherwise the body stays as before.
+  const embedded = field("checkoutMode") === "embedded";
 
   if (!planKey) return { status: "error", formError: M.planUnavailable, salesLink: true };
 
@@ -59,7 +62,16 @@ export async function startCheckout(_prev: CheckoutState, formData: FormData): P
         "Idempotency-Key": idempotencyKey,
         ...(clientIp ? { "x-sidekick-client-ip": clientIp } : {}),
       },
-      body: JSON.stringify({ planKey, name, email, phone, businessName, acceptTerms: true, ...(addons ? { addons } : {}) }),
+      body: JSON.stringify({
+        planKey,
+        name,
+        email,
+        phone,
+        businessName,
+        acceptTerms: true,
+        ...(addons ? { addons } : {}),
+        ...(embedded ? { checkoutMode: "embedded" } : {}),
+      }),
       cache: "no-store",
       signal: AbortSignal.timeout(15_000),
     });
@@ -71,16 +83,21 @@ export async function startCheckout(_prev: CheckoutState, formData: FormData): P
 
   if (res.status === 201 || res.status === 200) {
     const created = createdSchema.safeParse(body);
-    const checkoutUrl = created.success ? safeRedirectUrl(created.data.checkoutUrl) : null;
-    if (!created.success || !checkoutUrl) return { status: "error", formError: M.failed };
-    (await cookies()).set(signupCookie(created.data.signupId), created.data.signupToken, {
+    if (!created.success) return { status: "error", formError: M.failed };
+    const { signupId, signupToken, clientSecret } = created.data;
+    const inPage = embedded && created.data.checkoutMode === "embedded" && typeof clientSecret === "string" && CLIENT_SECRET.test(clientSecret);
+    // Hosted fallback: the API chose Stripe's hosted page (or sent no usable secret).
+    const checkoutUrl = inPage ? null : safeRedirectUrl(created.data.checkoutUrl);
+    if (!inPage && !checkoutUrl) return { status: "error", formError: M.failed };
+    (await cookies()).set(signupCookie(signupId), signupToken, {
       httpOnly: true,
       secure: !isLocalHost((await headers()).get("host")),
       sameSite: "lax",
       path: SIGNUP_COOKIE_PATH,
       maxAge: SIGNUP_COOKIE_MAX_AGE,
     });
-    redirect(checkoutUrl); // 303 for no-JS submits, client navigation otherwise
+    if (inPage) return { status: "embedded", signupId, clientSecret: clientSecret! };
+    redirect(checkoutUrl!); // 303 for no-JS submits, client navigation otherwise
   }
 
   const code = (body as { code?: unknown } | null)?.code;

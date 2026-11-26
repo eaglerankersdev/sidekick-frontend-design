@@ -92,13 +92,16 @@ export const isPurchasable = (p: LivePlan) => p.available && p.priceMinor !== nu
 
 const num = (n: number) => n.toLocaleString("en-US");
 
-/** The allowances a buyer compares, as label/value pairs (checkout plan card and the upgrade comparison). */
+const SERVICE_PAGES = { none: "Not included", single: "One page", dedicated: "One per service" } as const;
+
+/** The allowances a buyer compares, as label/value pairs (checkout summary, plan comparison, upgrade comparison). */
 export function planFacts(p: LivePlan): [string, string][] {
   const pages = p.website.maxPages === null ? "Ask sales" : p.website.maxPages === 1 ? "Home page" : `Up to ${p.website.maxPages}`;
   return [
     ["Service workspaces", num(p.workspaces)],
     ["AI credits each month", num(p.aiCredits)],
-    ["Team members included", num(p.teamMembers)],
+    ["Team members", num(p.teamMembers)],
     ["Website pages", pages],
+    ["Service pages", SERVICE_PAGES[p.website.servicePages]],
   ];
 }

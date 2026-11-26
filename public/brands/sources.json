@@ -8,7 +8,12 @@
     "gmail.png": "https://www.gstatic.com/images/branding/product/2x/gmail_2020q4_48dp.png",
     "google-ads.png": "https://www.gstatic.com/images/branding/product/2x/ads_48dp.png",
     "callrail.svg": "https://main--dotcom-prod.netlify.app/assets/svg/logos/callrail-logotype.svg",
-    "chatgpt.svg": "https://raw.githubusercontent.com/simple-icons/simple-icons/14.0.0/icons/openai.svg"
+    "chatgpt.svg": "https://raw.githubusercontent.com/simple-icons/simple-icons/14.0.0/icons/openai.svg",
+    "callrail-mark.png": "https://www.callrail.com/favicon.png",
+    "visa.svg": "https://github.com/aaronfagan/svg-credit-card-payment-icons/blob/main/flat-rounded/visa.svg (Apache-2.0)",
+    "mastercard.svg": "https://github.com/aaronfagan/svg-credit-card-payment-icons/blob/main/flat-rounded/mastercard.svg (Apache-2.0)",
+    "amex.svg": "https://github.com/aaronfagan/svg-credit-card-payment-icons/blob/main/flat-rounded/amex.svg (Apache-2.0)",
+    "discover.svg": "https://github.com/aaronfagan/svg-credit-card-payment-icons/blob/main/flat-rounded/discover.svg (Apache-2.0)"
   },
   "usage": "Brand marks identify third-party products. Availability is stated separately; no endorsement or active integration is implied."
 }

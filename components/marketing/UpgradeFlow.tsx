@@ -2,22 +2,39 @@
 
 import { useEffect, useId, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { AlertCircle, AlertTriangle, ArrowRight, CalendarClock, Check, CreditCard, Loader2, Mail } from "lucide-react";
+import { AlertTriangle, CalendarClock, Check, CreditCard, Loader2, LockKeyhole, Mail } from "lucide-react";
+import { planCopyByKey } from "@/content/pricing";
 import { confirmUpgrade, previewUpgrade, requestCode, verifyCode, type ChangeRequest } from "@/app/checkout/upgrade/actions";
 import { addonPrices } from "@/lib/addons";
 import { PLAN_KEYS, formatMoney, planFacts, type LivePlan, type PlanKey, type Pricing } from "@/lib/pricing";
 import { RESEND_AFTER_S, type AccountBusiness, type UpgradePreview } from "@/lib/upgrade";
-import { AddOnList, PacksAddOn, PlanIcon, SeatsAddOn, SummaryPanel } from "./CheckoutParts";
+import {
+  AddOnList,
+  Alert,
+  FieldError,
+  PacksAddOn,
+  Pill,
+  PlanIcon,
+  PlanOption,
+  RadioDot,
+  SeatsAddOn,
+  SectionCard,
+  SummaryCard,
+  SummaryHead,
+  TrustLine,
+  cardBase,
+  coverInput,
+  fieldLabel,
+  inputCls,
+  optionOff,
+  optionOn,
+  smallCaps,
+} from "./CheckoutParts";
 import { btnGhost, btnPrimary } from "./tw";
 
 type Fail = { ok: false; error: string; expired?: boolean; field?: "email" | "code" };
 type Step = { kind: "email" } | { kind: "code"; challengeId: string; expiresAt: string; sentAt: number } | { kind: "change"; businesses: AccountBusiness[] };
 
-const h1 = "text-h2 text-balance max-sm:text-[clamp(1.85rem,7.8vw,2.4rem)] max-sm:leading-[1.15]";
-const input =
-  "block min-h-12 w-full rounded-btn! border-[1.5px] border-line bg-white px-3.5 py-3 font-semibold text-navy transition-[border-color] duration-200 " +
-  "hover:border-line-strong focus-visible:border-cobalt aria-invalid:border-danger";
-const card = "rounded-xl bg-white p-[clamp(20px,3vw,32px)] ring-1 ring-line";
 const busyBtn = `${btnPrimary} w-full disabled:cursor-not-allowed disabled:opacity-75 disabled:hover:translate-y-0`;
 
 export function UpgradeFlow({ pricing, initialPlan }: { pricing: Pricing; initialPlan: PlanKey | null }) {
@@ -25,6 +42,7 @@ export function UpgradeFlow({ pricing, initialPlan }: { pricing: Pricing; initia
   const [email, setEmail] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const [minutes, setMinutes] = useState<number | null>(null);
 
   // Each step starts with its heading focused, so keyboard and screen reader users land on the new content.
   const first = useRef(true);
@@ -46,48 +64,69 @@ export function UpgradeFlow({ pricing, initialPlan }: { pricing: Pricing; initia
 
   const target = pricing.plans.find((p) => p.key === initialPlan);
   return (
-    <div className="mt-3 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-x-10">
-      <div className="min-w-0">
-        {step.kind === "email" ? (
-          <EmailStep
-            email={email}
-            setEmail={setEmail}
-            notice={notice}
-            headingRef={headingRef}
-            onSent={(c) => {
-              setNotice(null);
-              setStep({ kind: "code", ...c, sentAt: Date.now() });
-            }}
-          />
-        ) : (
-          <CodeStep
-            key={step.challengeId}
-            email={email}
-            challenge={step}
-            headingRef={headingRef}
-            onResent={(c) => setStep({ kind: "code", ...c, sentAt: Date.now() })}
-            onBack={() => setStep({ kind: "email" })}
-            onVerified={(businesses) => setStep({ kind: "change", businesses })}
-            onExpired={restart}
-          />
-        )}
+    <>
+      {step.kind === "email" ? (
+        <PageHeader eyebrow="Existing customers" title="Upgrade your SideKick plan" headingRef={headingRef}>
+          <p className="mt-3 text-[1.05rem] leading-normal text-muted">Enter the email you sign in with. We&apos;ll send a 6-digit code to confirm it&apos;s you.</p>
+        </PageHeader>
+      ) : (
+        <PageHeader eyebrow="Existing customers" title="Check your email" headingRef={headingRef}>
+          <p role="status" className="mt-3 text-[1.05rem] leading-normal text-muted">
+            If <strong className="break-all text-navy">{email.trim()}</strong> has a SideKick account, we sent a 6-digit code.
+            {minutes ? ` It works for about ${minutes} minutes.` : ""}
+          </p>
+        </PageHeader>
+      )}
+      <div className={gridCls}>
+        <div className="min-w-0 lg:col-start-1 lg:row-start-1">
+          {step.kind === "email" ? (
+            <EmailStep
+              email={email}
+              setEmail={setEmail}
+              notice={notice}
+              onSent={(c) => {
+                setNotice(null);
+                setMinutes(minutesLeft(c.expiresAt));
+                setStep({ kind: "code", ...c, sentAt: Date.now() });
+              }}
+            />
+          ) : (
+            <CodeStep
+              key={step.challengeId}
+              email={email}
+              challenge={step}
+              onResent={(c) => {
+                setMinutes(minutesLeft(c.expiresAt));
+                setStep({ kind: "code", ...c, sentAt: Date.now() });
+              }}
+              onBack={() => setStep({ kind: "email" })}
+              onVerified={(businesses) => setStep({ kind: "change", businesses })}
+              onExpired={restart}
+            />
+          )}
+        </div>
+        <div className="min-w-0 lg:col-start-2 lg:row-start-1">
+          {target ? <TargetPlan plan={target} currency={pricing.currency} /> : <PlanList plans={pricing.plans} currency={pricing.currency} />}
+        </div>
       </div>
-      {target ? <TargetPlan plan={target} currency={pricing.currency} /> : <PlanList plans={pricing.plans} currency={pricing.currency} />}
-    </div>
+    </>
   );
 }
 
-function Alert({ children, refEl }: { children: React.ReactNode; refEl?: React.Ref<HTMLDivElement> }) {
+const gridCls = "mt-8 grid items-start gap-5 lg:mt-10 lg:grid-cols-[minmax(0,62fr)_minmax(0,38fr)] lg:gap-8";
+
+function PageHeader({ eyebrow, title, headingRef, children }: { eyebrow: string; title: string; headingRef: React.Ref<HTMLHeadingElement>; children?: React.ReactNode }) {
   return (
-    <div
-      ref={refEl}
-      tabIndex={-1}
-      role="alert"
-      className="flex items-start gap-2.5 rounded-md border border-danger-line bg-danger-bg px-4 py-3.5 font-bold text-danger-ink [&>svg]:mt-0.5 [&>svg]:size-[18px] [&>svg]:shrink-0"
-    >
-      <AlertCircle aria-hidden />
-      <span>{children}</span>
-    </div>
+    <header className="max-w-[46rem]">
+      <p className={`${smallCaps} flex items-center gap-1.5 text-cobalt`}>
+        <LockKeyhole aria-hidden className="size-3.5" strokeWidth={2.4} /> {eyebrow}
+      </p>
+      <h1 ref={headingRef} tabIndex={-1} className="mt-3 text-[clamp(2rem,1.45rem+2.2vw,3.1rem)] leading-[1.08] font-bold tracking-[-0.025em] text-balance text-navy outline-none!">
+        {title}
+        <span aria-hidden className="ml-1.5 inline-block size-2.5 rounded-full bg-cobalt align-baseline sm:size-3" />
+      </h1>
+      {children}
+    </header>
   );
 }
 
@@ -95,81 +134,68 @@ function EmailStep({
   email,
   setEmail,
   notice,
-  headingRef,
   onSent,
 }: {
   email: string;
   setEmail: (v: string) => void;
   notice: string | null;
-  headingRef: React.Ref<HTMLHeadingElement>;
   onSent: (c: { challengeId: string; expiresAt: string }) => void;
 }) {
   const id = useId();
   const [pending, start] = useTransition();
   const [fail, setFail] = useState<Fail | null>(null);
   return (
-    <>
-      <h1 ref={headingRef} tabIndex={-1} className={`${h1} outline-none!`}>
-        Upgrade your SideKick plan
-      </h1>
-      <p className="mt-3 max-w-[56ch] text-lead leading-[1.55]">Enter the email you sign in with. We&apos;ll send a 6-digit code to confirm it&apos;s you.</p>
-      <form
-        noValidate
-        aria-label="Get a sign-in code"
-        className={`${card} mt-8 grid gap-5`}
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (pending) return;
-          start(async () => {
-            const r = await requestCode(email);
-            if (r.ok) onSent(r);
-            else setFail(r);
-          });
-        }}
-      >
-        {notice && !fail && <Alert>{notice}</Alert>}
-        {fail && !fail.field && <Alert>{fail.error}</Alert>}
-        <div className="grid gap-1.5">
-          <label htmlFor={`${id}-email`} className="text-[0.92rem] font-bold">
-            Email
-          </label>
-          <input
-            id={`${id}-email`}
-            type="email"
-            name="email"
-            autoComplete="email"
-            inputMode="email"
-            spellCheck={false}
-            maxLength={254}
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            aria-invalid={fail?.field === "email"}
-            aria-describedby={fail?.field === "email" ? `${id}-err` : undefined}
-            className={input}
-          />
-          {fail?.field === "email" && <FieldError id={`${id}-err`}>{fail.error}</FieldError>}
+    <form
+      noValidate
+      aria-label="Get a sign-in code"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (pending) return;
+        start(async () => {
+          const r = await requestCode(email);
+          if (r.ok) onSent(r);
+          else setFail(r);
+        });
+      }}
+    >
+      <SectionCard n="01" id={`${id}-title`} title="Confirm it's you" subtitle="One code, no password needed. It only works for the owner of the account.">
+        <div className="grid gap-5">
+          {notice && !fail && <Alert>{notice}</Alert>}
+          {fail && !fail.field && <Alert>{fail.error}</Alert>}
+          <div className="grid gap-2">
+            <label htmlFor={`${id}-email`} className={fieldLabel}>
+              Email
+            </label>
+            <input
+              id={`${id}-email`}
+              type="email"
+              name="email"
+              autoComplete="email"
+              inputMode="email"
+              spellCheck={false}
+              maxLength={254}
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              aria-invalid={fail?.field === "email"}
+              aria-describedby={fail?.field === "email" ? `${id}-err` : undefined}
+              className={inputCls}
+            />
+            {fail?.field === "email" && <FieldError id={`${id}-err`}>{fail.error}</FieldError>}
+          </div>
+          <button type="submit" className={busyBtn} disabled={pending} aria-busy={pending}>
+            {pending ? <Loader2 aria-hidden className="animate-spin motion-reduce:animate-none" /> : <Mail aria-hidden />}
+            {pending ? "Sending code" : "Send code"}
+          </button>
+          <p className="text-center text-[0.9rem] text-muted">
+            New to SideKick?{" "}
+            <Link href="/pricing#plans" className="font-bold text-cobalt underline-offset-4 hover:underline">
+              See plans
+            </Link>
+          </p>
         </div>
-        <button type="submit" className={busyBtn} disabled={pending} aria-busy={pending}>
-          {pending ? <Loader2 aria-hidden className="animate-spin motion-reduce:animate-none" /> : <Mail aria-hidden />}
-          {pending ? "Sending code" : "Send code"}
-        </button>
-        <p className="text-center text-[0.92rem] text-muted">
-          New to SideKick?{" "}
-          <Link href="/pricing#plans" className="font-bold text-cobalt underline-offset-4 hover:underline">
-            See plans
-          </Link>
-        </p>
-      </form>
-    </>
-  );
-}
-
-function FieldError({ id, children }: { id: string; children: React.ReactNode }) {
-  return (
-    <span id={id} className="mt-1.5 flex items-center gap-1.5 text-[0.85rem] font-bold text-danger [&>svg]:size-[15px] [&>svg]:shrink-0">
-      <AlertCircle aria-hidden /> {children}
-    </span>
+      </SectionCard>
+    </form>
   );
 }
 
@@ -178,10 +204,43 @@ function minutesLeft(expiresAt: string) {
   return Number.isFinite(ms) && ms > 60_000 ? Math.round(ms / 60_000) : null;
 }
 
+/** Six boxes over one real input (one-time-code autofill, paste and screen readers all see a single field). */
+function CodeBoxes({ inputRef, id, code, invalid, ...input }: { inputRef: React.Ref<HTMLInputElement>; id: string; code: string; invalid: boolean } & React.InputHTMLAttributes<HTMLInputElement>) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <div className="relative w-fit">
+      <div aria-hidden className="grid grid-cols-6 gap-2 sm:gap-2.5">
+        {Array.from({ length: 6 }, (_, i) => {
+          const active = focused && (i === Math.min(code.length, 5));
+          return (
+            <span
+              key={i}
+              className={`grid h-14 w-11 place-items-center rounded-[12px] border bg-white text-[1.5rem] font-bold text-navy tabular-nums transition-[border-color,box-shadow] duration-150 sm:h-16 sm:w-13 ${
+                invalid ? "border-danger" : active ? "border-cobalt shadow-[0_0_0_4px_rgb(0_98_253/0.14)]" : code[i] ? "border-[#b6c4d6]" : "border-[#d7dee8]"
+              }`}
+            >
+              {code[i] ?? ""}
+            </span>
+          );
+        })}
+      </div>
+      <input
+        ref={inputRef}
+        id={id}
+        {...input}
+        value={code}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        aria-invalid={invalid}
+        className="absolute inset-0 size-full rounded-[12px]! border-0! bg-transparent text-transparent caret-transparent shadow-none! outline-none! selection:bg-transparent"
+      />
+    </div>
+  );
+}
+
 function CodeStep({
   email,
   challenge,
-  headingRef,
   onResent,
   onBack,
   onVerified,
@@ -189,7 +248,6 @@ function CodeStep({
 }: {
   email: string;
   challenge: { challengeId: string; expiresAt: string; sentAt: number };
-  headingRef: React.Ref<HTMLHeadingElement>;
   onResent: (c: { challengeId: string; expiresAt: string }) => void;
   onBack: () => void;
   onVerified: (b: AccountBusiness[]) => void;
@@ -203,7 +261,6 @@ function CodeStep({
   const [now, setNow] = useState(() => Date.now());
   const inputRef = useRef<HTMLInputElement>(null);
   const wait = Math.max(0, RESEND_AFTER_S - Math.floor((now - challenge.sentAt) / 1000));
-  const [minutes] = useState(() => minutesLeft(challenge.expiresAt));
 
   useEffect(() => {
     if (wait <= 0) return;
@@ -222,116 +279,110 @@ function CodeStep({
     });
   };
 
+  const link = "inline-flex min-h-11 items-center font-bold text-cobalt underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:text-muted disabled:no-underline";
   return (
-    <>
-      <h1 ref={headingRef} tabIndex={-1} className={`${h1} outline-none!`}>
-        Check your email
-      </h1>
-      <p role="status" className="mt-3 max-w-[56ch] text-lead leading-[1.55]">
-        If <strong className="break-all text-navy">{email.trim()}</strong> has a SideKick account, we sent a 6-digit code.
-        {minutes ? ` It works for about ${minutes} minutes.` : ""}
-      </p>
-      <form
-        noValidate
-        aria-label="Enter your code"
-        className={`${card} mt-8 grid gap-5`}
-        onSubmit={(e) => {
-          e.preventDefault();
-          verify(code);
-        }}
-      >
-        {fail && fail.field !== "code" && <Alert>{fail.error}</Alert>}
-        <div className="grid gap-1.5">
-          <label htmlFor={`${id}-code`} className="text-[0.92rem] font-bold">
-            6-digit code
-          </label>
-          <input
-            ref={inputRef}
-            id={`${id}-code`}
-            name="code"
-            autoComplete="one-time-code"
-            inputMode="numeric"
-            autoFocus
-            value={code}
-            onChange={(e) => {
-              // Accepts pasted codes with spaces or dashes; submits on the sixth digit.
-              const digits = e.target.value.replace(/\D/g, "").slice(0, 6);
-              setCode(digits);
-              if (fail?.field === "code") setFail(null);
-              if (digits.length === 6 && digits !== code) verify(digits);
-            }}
-            aria-invalid={fail?.field === "code"}
-            aria-describedby={fail?.field === "code" ? `${id}-err` : undefined}
-            className={`${input} max-w-[16rem] text-center text-2xl tracking-[0.4em] tabular-nums`}
-          />
-          {fail?.field === "code" && <FieldError id={`${id}-err`}>{fail.error}</FieldError>}
-        </div>
-        <button type="submit" className={busyBtn} disabled={pending || code.length !== 6} aria-busy={pending}>
-          {pending ? <Loader2 aria-hidden className="animate-spin motion-reduce:animate-none" /> : <Check aria-hidden />}
-          {pending ? "Checking code" : "Verify code"}
-        </button>
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-[0.92rem]">
-          <button
-            type="button"
-            disabled={wait > 0 || resending}
-            onClick={() =>
-              startResend(async () => {
-                const r = await requestCode(email);
-                if (r.ok) {
-                  setCode("");
-                  setFail(null);
-                  onResent(r);
-                } else setFail({ ok: false, error: r.error });
-              })
-            }
-            className="inline-flex min-h-11 items-center font-bold text-cobalt underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:text-muted disabled:no-underline"
-          >
-            {resending ? "Sending a new code" : wait > 0 ? `Send a new code in 0:${String(wait).padStart(2, "0")}` : "Send a new code"}
+    <form
+      noValidate
+      aria-label="Enter your code"
+      onSubmit={(e) => {
+        e.preventDefault();
+        verify(code);
+      }}
+    >
+      <SectionCard n="02" id={`${id}-title`} title="Enter your code" subtitle="It arrives within a minute. Check spam if you don't see it.">
+        <div className="grid gap-5">
+          {fail && fail.field !== "code" && <Alert>{fail.error}</Alert>}
+          <div className="grid gap-2.5">
+            <label htmlFor={`${id}-code`} className={fieldLabel}>
+              6-digit code
+            </label>
+            <CodeBoxes
+              inputRef={inputRef}
+              id={`${id}-code`}
+              code={code}
+              invalid={fail?.field === "code"}
+              name="code"
+              autoComplete="one-time-code"
+              inputMode="numeric"
+              autoFocus
+              onChange={(e) => {
+                // Accepts pasted codes with spaces or dashes; submits on the sixth digit.
+                const digits = e.target.value.replace(/\D/g, "").slice(0, 6);
+                setCode(digits);
+                if (fail?.field === "code") setFail(null);
+                if (digits.length === 6 && digits !== code) verify(digits);
+              }}
+              aria-describedby={fail?.field === "code" ? `${id}-err` : undefined}
+            />
+            {fail?.field === "code" && <FieldError id={`${id}-err`}>{fail.error}</FieldError>}
+          </div>
+          <button type="submit" className={busyBtn} disabled={pending || code.length !== 6} aria-busy={pending}>
+            {pending ? <Loader2 aria-hidden className="animate-spin motion-reduce:animate-none" /> : <Check aria-hidden />}
+            {pending ? "Checking code" : "Verify code"}
           </button>
-          <button type="button" onClick={onBack} className="inline-flex min-h-11 items-center font-bold text-cobalt underline-offset-4 hover:underline">
-            Use a different email
-          </button>
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-[0.9rem]">
+            <button
+              type="button"
+              disabled={wait > 0 || resending}
+              onClick={() =>
+                startResend(async () => {
+                  const r = await requestCode(email);
+                  if (r.ok) {
+                    setCode("");
+                    setFail(null);
+                    onResent(r);
+                  } else setFail({ ok: false, error: r.error });
+                })
+              }
+              className={link}
+            >
+              {resending ? "Sending a new code" : wait > 0 ? `Send a new code in 0:${String(wait).padStart(2, "0")}` : "Send a new code"}
+            </button>
+            <button type="button" onClick={onBack} className={link}>
+              Use a different email
+            </button>
+          </div>
         </div>
-      </form>
-    </>
+      </SectionCard>
+    </form>
   );
 }
 
 function TargetPlan({ plan, currency }: { plan: LivePlan; currency: string }) {
   return (
-    <aside aria-label={`${plan.name} plan`} className="rounded-xl bg-navy p-[clamp(20px,3vw,32px)] text-white lg:mt-[5.5rem]">
-      <div className="flex items-center gap-4">
-        <PlanIcon planKey={plan.key} className="bg-white/10 text-light-blue" />
-        <div>
-          <p className="text-2xl font-bold">{plan.name}</p>
-          <p className="font-semibold text-navy-soft tabular-nums">{formatMoney(plan.priceMinor!, currency)} per month</p>
-        </div>
-      </div>
-      <dl className="mt-6 grid gap-3">
+    <aside aria-label={`${plan.name} plan`} className={`${cardBase} p-6 sm:p-7 lg:sticky lg:top-[calc(var(--header-h)+24px)]`}>
+      <p className={`${smallCaps} mb-4 text-[#4a5d78]`}>Selected plan</p>
+      <SummaryHead planKey={plan.key} title={`${plan.name} plan`} sub={`${formatMoney(plan.priceMinor!, currency)} per month`} />
+      <dl className="mt-5 grid gap-2.5 border-t border-[#e8ecf2] pt-5 text-[0.88rem]">
         {planFacts(plan).map(([label, value]) => (
           <div key={label} className="flex items-baseline justify-between gap-4">
-            <dt className="text-navy-soft">{label}</dt>
-            <dd className="font-bold tabular-nums">{value}</dd>
+            <dt className="text-muted">{label}</dt>
+            <dd className="text-right font-bold text-navy tabular-nums">{value}</dd>
           </div>
         ))}
       </dl>
+      <TrustLine className="mt-6 border-t border-[#e8ecf2] pt-5" />
     </aside>
   );
 }
 
 function PlanList({ plans, currency }: { plans: LivePlan[]; currency: string }) {
   return (
-    <aside aria-label="Plans" className="rounded-xl bg-canvas p-[clamp(20px,3vw,32px)] lg:mt-[5.5rem]">
-      <p className="font-bold">You can change to any plan</p>
+    <aside aria-label="Plans" className={`${cardBase} p-6 sm:p-7 lg:sticky lg:top-[calc(var(--header-h)+24px)]`}>
+      <p className={`${smallCaps} text-[#4a5d78]`}>You can change to any plan</p>
       <ul role="list" className="mt-4 grid gap-3">
         {plans.map((p) => (
-          <li key={p.key} className="flex items-center gap-4 rounded-lg bg-white p-3">
-            <PlanIcon planKey={p.key} className="bg-ice text-cobalt" />
-            <span className="min-w-0 flex-1 font-bold">{p.name}</span>
-            <span className="font-semibold text-muted tabular-nums">{formatMoney(p.priceMinor!, currency)}/mo</span>
+          <li key={p.key} className="flex items-center gap-3.5">
+            <PlanIcon planKey={p.key} size="sm" />
+            <span className="min-w-0 flex-1 font-bold text-navy">{p.name}</span>
+            <span className="font-bold text-navy tabular-nums">
+              {formatMoney(p.priceMinor!, currency)}
+              <span className="text-[0.85rem] font-semibold text-muted">/mo</span>
+            </span>
           </li>
         ))}
       </ul>
+      <TrustLine className="mt-6 border-t border-[#e8ecf2] pt-5" />
     </aside>
   );
 }
@@ -441,98 +492,86 @@ function ChangeStep({
   const later = shown?.effective === "next_renewal";
   const ctaLabel = !shown ? "Confirm change" : later ? "Schedule change" : shown.dueNowMinor > 0 ? `Pay ${money(shown.dueNowMinor)} now` : "Confirm change";
 
+  let n = 0;
+  const num = () => String(++n).padStart(2, "0");
+
   return (
-    <div className="mt-3">
-      <h1 ref={headingRef} tabIndex={-1} className={`${h1} outline-none!`}>
-        {heading}
-      </h1>
-      <p className="mt-3 max-w-[60ch] text-lead leading-[1.55]">
-        {business ? (
-          <>
-            Changes for <strong className="text-navy">{business.name}</strong>. Upgrades are charged now and take effect as soon as the payment succeeds.
-          </>
-        ) : businesses.length ? (
-          "Your email is linked to more than one business. Choose the one to change."
-        ) : (
-          "You're signed in, but there's nothing on this account to change here."
-        )}
-      </p>
+    <>
+      <PageHeader eyebrow="Existing customers" title={heading} headingRef={headingRef}>
+        <p className="mt-3 text-[1.05rem] leading-normal text-muted">
+          {business ? (
+            <>
+              Changes for <strong className="text-navy">{business.name}</strong>. Upgrades are charged now and take effect as soon as the payment succeeds.
+            </>
+          ) : businesses.length ? (
+            "Your email is linked to more than one business. Choose the one to change."
+          ) : (
+            "You're signed in, but there's nothing on this account to change here."
+          )}
+        </p>
+      </PageHeader>
 
-      <div className="mt-8 grid items-start gap-6 lg:mt-10 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-x-10">
-
-        <div className="grid min-w-0 gap-8 lg:col-start-1 lg:row-start-1">
+      <div className={gridCls}>
+        <div className="grid min-w-0 gap-5 lg:col-start-1 lg:row-start-1">
           {businesses.length > 1 && (
-            <fieldset className="m-0 grid min-w-0 gap-3 border-0 p-0">
-              <legend className="mb-3 text-xl font-bold">Which business?</legend>
-              {businesses.map((b) => (
-                <label
-                  key={b.businessId}
-                  className={`flex min-h-16 cursor-pointer items-center gap-4 rounded-xl p-4 transition-[background-color,box-shadow] duration-200 has-focus-visible:outline-2 has-focus-visible:outline-cobalt ${
-                    b.businessId === businessId ? "bg-ice/60 ring-2 ring-cobalt" : "bg-white ring-1 ring-line hover:ring-line-strong"
-                  }`}
-                >
-                  <input type="radio" name="business" value={b.businessId} checked={b.businessId === businessId} onChange={() => pickBusiness(b)} className="size-5 shrink-0 accent-cobalt" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block font-bold break-words">{b.name}</span>
-                    <span className="block text-[0.92rem] text-muted">
-                      {b.planName ?? "No plan"}
-                      {b.status !== "active" ? ` · ${b.status.replace(/_/g, " ")}` : ""}
-                    </span>
-                  </span>
-                  <PlanIcon planKey={b.planKey} className="bg-ice text-cobalt max-sm:hidden" />
-                </label>
-              ))}
-            </fieldset>
+            <SectionCard n={num()} id={`${id}-biz`} title="Which business?" subtitle="Your email owns more than one. Plans are per business.">
+              <fieldset className="m-0 grid min-w-0 gap-3 border-0 p-0">
+                <legend className="sr-only">Business</legend>
+                {businesses.map((b) => {
+                  const on = b.businessId === businessId;
+                  return (
+                    <label
+                      key={b.businessId}
+                      className={`relative flex min-h-16 cursor-pointer items-center gap-4 rounded-[16px] border p-4 transition-[border-color,background-color,box-shadow] duration-150 has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-cobalt ${on ? optionOn : optionOff}`}
+                    >
+                      <input type="radio" name="business" value={b.businessId} checked={on} onChange={() => pickBusiness(b)} className={coverInput} />
+                      <PlanIcon planKey={b.planKey} />
+                      <span className="min-w-0 flex-1">
+                        <span className="block font-bold break-words text-navy">{b.name}</span>
+                        <span className="block text-[0.86rem] text-muted">
+                          {b.planName ?? "No plan"}
+                          {b.status !== "active" ? ` · ${b.status.replace(/_/g, " ")}` : ""}
+                        </span>
+                      </span>
+                      <RadioDot checked={on} />
+                    </label>
+                  );
+                })}
+              </fieldset>
+            </SectionCard>
           )}
 
           {businesses.length === 0 && (
-            <div className={card}>
-              <p className="font-bold">There&apos;s no business on this account that can be changed here.</p>
-              <p className="mt-2 text-muted">Only the owner of a business can change its plan. Ask your business owner, or talk to our sales team.</p>
+            <SectionCard id={`${id}-none`} title="Nothing to change here" subtitle="Only the owner of a business can change its plan.">
+              <p className="text-muted">Ask your business owner, or talk to our sales team.</p>
               <Link href="/contact" className={`${btnGhost} mt-5`}>
                 Talk to sales
               </Link>
-            </div>
+            </SectionCard>
           )}
 
           {business && (
             <>
-              <fieldset className="m-0 min-w-0 border-0 p-0">
-                <legend className="mb-3 text-xl font-bold">Plan</legend>
-                <div className="grid gap-3 sm:grid-cols-3">
-                  {pricing.plans.map((p) => {
-                    const selected = target?.key === p.key;
-                    const isCurrent = p.key === business.planKey;
-                    return (
-                      <label
+              <SectionCard n={num()} id={`${id}-plan`} title="Choose your plan" subtitle="Upgrades unlock as soon as the payment succeeds. Lower plans start at your renewal.">
+                <fieldset className="m-0 min-w-0 border-0 p-0">
+                  <legend className="sr-only">Plan</legend>
+                  <div className="grid gap-3 md:grid-cols-3">
+                    {pricing.plans.map((p) => (
+                      <PlanOption
                         key={p.key}
-                        className={`relative grid cursor-pointer grid-cols-[48px_minmax(0,1fr)_auto] items-center gap-x-4 gap-y-3 rounded-xl p-4 transition-[background-color,box-shadow] duration-200 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-cobalt sm:grid-cols-[48px_minmax(0,1fr)] sm:items-start ${
-                          selected ? "bg-ice/60 ring-2 ring-cobalt" : "bg-white ring-1 ring-line hover:ring-line-strong"
-                        }`}
-                      >
-                        <input type="radio" name="plan" value={p.key} checked={selected} onChange={() => setTargetKey(p.key)} className="sr-only" />
-                        <PlanIcon planKey={p.key} className={`row-start-1 ${selected ? "bg-cobalt text-white" : "bg-ice text-cobalt"}`} />
-                        <span className="col-start-2 row-start-1 sm:col-span-2 sm:col-start-1 sm:row-start-2">
-                          <span className="block text-lg font-bold">{p.name}</span>
-                          <span className="block font-semibold text-muted tabular-nums">{formatMoney(p.priceMinor!, pricing.currency)} per month</span>
-                        </span>
-                        {isCurrent && (
-                          <span className="col-start-3 row-start-1 justify-self-end rounded-full bg-canvas px-2.5 py-1 text-[0.8rem] font-bold whitespace-nowrap text-muted sm:col-start-2">
-                            Current plan
-                          </span>
-                        )}
-                      </label>
-                    );
-                  })}
-                </div>
-              </fieldset>
+                        name="plan"
+                        plan={{ key: p.key, name: p.name, tagline: planCopyByKey[p.key].tagline, price: formatMoney(p.priceMinor!, pricing.currency) }}
+                        checked={target?.key === p.key}
+                        onChange={() => setTargetKey(p.key)}
+                        note={p.key === business.planKey ? { text: "Current plan", tone: "quiet" } : null}
+                      />
+                    ))}
+                  </div>
+                </fieldset>
+                {current && target && isPlanChange && <Compare current={current} target={target} id={id} />}
+              </SectionCard>
 
-              {current && target && isPlanChange && <Compare current={current} target={target} id={id} />}
-
-              <section aria-labelledby={`${id}-addons`} className="grid gap-4">
-                <h2 id={`${id}-addons`} className="text-xl">
-                  Add-ons
-                </h2>
+              <SectionCard n={num()} id={`${id}-addons`} title="Add-ons" badge={<Pill tone="quiet">Optional</Pill>} subtitle="Extra seats renew monthly. Credit packs are one-time.">
                 <AddOnList>
                   {target && (
                     <SeatsAddOn
@@ -546,20 +585,25 @@ function ChangeStep({
                   )}
                   {target && <PacksAddOn prices={addonPrices(pricing, target)} currency={pricing.currency} value={packs} onChange={setPacks} />}
                 </AddOnList>
-              </section>
+              </SectionCard>
             </>
           )}
         </div>
-        <SummaryPanel
+        <SummaryCard
           className="lg:col-start-2 lg:row-start-1"
           collapsible={false}
+          head={
+            target && business ? (
+              <SummaryHead planKey={target.key} title={`${target.name} plan`} sub={`For ${business.name}`} badge={isPlanChange ? (isUpgrade ? "Upgrade" : "Change") : "Monthly"} />
+            ) : undefined
+          }
           totalLabel="Charged now"
           total={money(shown?.dueNowMinor ?? 0)}
           busy={preview.kind === "loading"}
           then={
             shown && (
               <>
-                Then {money(shown.newMonthlyMinor)} per month{date(shown.renewalAt) ? ` from ${date(shown.renewalAt)}` : ""}
+                then {money(shown.newMonthlyMinor)}/month{date(shown.renewalAt) ? ` from ${date(shown.renewalAt)}` : ""}
               </>
             )
           }
@@ -570,9 +614,9 @@ function ChangeStep({
           }))}
         >
           <div className="mt-5 grid gap-4">
-            {preview.kind === "idle" && <p className="text-muted">{business ? "Choose a new plan or an add-on to see the price." : "Choose a business first."}</p>}
+            {preview.kind === "idle" && <p className="text-[0.9rem] text-muted">{business ? "Choose a new plan or an add-on to see the price." : "Choose a business first."}</p>}
             {preview.kind === "loading" && !shown && (
-              <p className="flex items-center gap-2 text-muted">
+              <p className="flex items-center gap-2 text-[0.9rem] text-muted">
                 <Loader2 aria-hidden className="size-4 animate-spin motion-reduce:animate-none" /> Working out the price
               </p>
             )}
@@ -580,7 +624,7 @@ function ChangeStep({
             {shown && (
               <>
                 {later ? (
-                  <p className="flex items-start gap-2.5 text-[0.95rem] [&>svg]:mt-0.5 [&>svg]:size-[18px] [&>svg]:shrink-0 [&>svg]:text-cobalt">
+                  <p className={noteCls}>
                     <CalendarClock aria-hidden />
                     <span>
                       Nothing is charged now. The change takes effect at your next renewal{date(shown.renewalAt) ? ` on ${date(shown.renewalAt)}` : ""}.
@@ -588,7 +632,7 @@ function ChangeStep({
                   </p>
                 ) : (
                   shown.dueNowMinor > 0 && (
-                    <p className="flex items-start gap-2.5 text-[0.95rem] [&>svg]:mt-0.5 [&>svg]:size-[18px] [&>svg]:shrink-0 [&>svg]:text-cobalt">
+                    <p className={noteCls}>
                       <CreditCard aria-hidden />
                       <span>
                         Charged now: <strong className="tabular-nums">{money(shown.dueNowMinor)}</strong>
@@ -604,7 +648,7 @@ function ChangeStep({
                   )
                 )}
                 {shown.warnings.length > 0 && (
-                  <ul role="list" className="grid gap-2 rounded-lg bg-(--dev-bg) p-4 text-[0.92rem] text-(--dev)">
+                  <ul role="list" className="grid gap-2 rounded-[14px] bg-(--dev-bg) p-4 text-[0.88rem] text-(--dev)">
                     {shown.warnings.map((w) => (
                       <li key={w.code + w.message} className="flex items-start gap-2.5 font-semibold [&>svg]:mt-0.5 [&>svg]:size-4 [&>svg]:shrink-0">
                         <AlertTriangle aria-hidden /> {w.message}
@@ -622,51 +666,56 @@ function ChangeStep({
                 </>
               ) : (
                 <>
-                  {ctaLabel} <ArrowRight aria-hidden />
+                  {later ? <CalendarClock aria-hidden /> : <LockKeyhole aria-hidden />} {ctaLabel}
                 </>
               )}
             </button>
           </div>
-        </SummaryPanel>
+          <TrustLine className="mt-5" />
+        </SummaryCard>
       </div>
-    </div>
+    </>
   );
 }
+
+const noteCls = "flex items-start gap-2.5 text-[0.9rem] leading-normal text-navy [&>svg]:mt-0.5 [&>svg]:size-[18px] [&>svg]:shrink-0 [&>svg]:text-cobalt";
 
 function Compare({ current, target, id }: { current: LivePlan; target: LivePlan; id: string }) {
   const now = planFacts(current);
   const next = planFacts(target);
   return (
-    <section aria-labelledby={`${id}-compare`} className="overflow-hidden rounded-xl bg-white ring-1 ring-line">
-      <h2 id={`${id}-compare`} className="sr-only">
+    <section aria-labelledby={`${id}-compare`} className="mt-5">
+      <h3 id={`${id}-compare`} className={`${smallCaps} mb-2.5 text-[#4a5d78]`}>
         What changes
-      </h2>
-      <table className="w-full border-collapse text-left">
-        <thead>
-          <tr className="bg-canvas">
-            <th scope="col" className="px-4 py-3.5 sm:px-5">
-              <span className="sr-only">Allowance</span>
-            </th>
-            <th scope="col" className="px-3 py-3.5 text-right font-bold text-muted sm:px-5">
-              {current.name}
-            </th>
-            <th scope="col" className="px-4 py-3.5 text-right font-bold text-cobalt sm:px-5">
-              {target.name}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {now.map(([label, value], i) => (
-            <tr key={label} className="border-t border-line" /* taste-skill-ignore: a real table */>
-              <th scope="row" className="px-4 py-3.5 font-semibold sm:px-5">
-                {label}
+      </h3>
+      <div className="overflow-x-auto rounded-[14px] border border-[#e2e7ee]">
+        <table className="w-full border-collapse text-left text-[0.88rem]">
+          <thead>
+            <tr className="bg-[#f7f9fc]">
+              <th scope="col" className="px-4 py-3">
+                <span className="sr-only">Allowance</span>
               </th>
-              <td className="px-3 py-3.5 text-right text-muted tabular-nums sm:px-5">{value}</td>
-              <td className={`px-4 py-3.5 text-right tabular-nums sm:px-5 ${next[i][1] !== value ? "font-bold text-navy" : "text-muted"}`}>{next[i][1]}</td>
+              <th scope="col" className="px-3 py-3 text-right font-bold text-muted sm:px-4">
+                {current.name}
+              </th>
+              <th scope="col" className="px-4 py-3 text-right font-bold text-cobalt">
+                {target.name}
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {now.map(([label, value], i) => (
+              <tr key={label} className="border-t border-[#eef1f5]">
+                <th scope="row" className="px-4 py-3 font-semibold text-muted">
+                  {label}
+                </th>
+                <td className="px-3 py-3 text-right text-muted tabular-nums sm:px-4">{value}</td>
+                <td className={`px-4 py-3 text-right tabular-nums ${next[i][1] !== value ? "bg-[#f5f9ff] font-bold text-navy" : "text-muted"}`}>{next[i][1]}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </section>
   );
 }

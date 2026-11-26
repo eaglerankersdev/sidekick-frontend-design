@@ -50,6 +50,13 @@ messages (`lib/inquiry.ts`). `?plan=basic|growth|enterprise` preselects the plan
    render, rotated after a 4xx) and `x-sidekick-client-ip`. On 201 it stores `signupToken` in an httpOnly, Secure,
    SameSite=Lax cookie `sk_signup_<signupId>` (path `/checkout`, 2 days) and redirects (303 without JS) to the
    returned Stripe `checkoutUrl`. 400 issues map to fields; 409/429/503 become friendly messages.
+   **Embedded Stripe Checkout:** when `GET /v1/public/stripe-config` returns a `publishableKey` (`lib/stripe-config.ts`,
+   cached 5 min; 503 or anything else = hosted page), the form also sends `checkoutMode: "embedded"`. A 201 with
+   `checkoutMode: "embedded"` and a `cs_…` `clientSecret` keeps the buyer on the page: the action sets the same cookie and
+   returns only `{ signupId, clientSecret }`, and card 04 mounts Stripe's `EmbeddedCheckout` (`@stripe/react-stripe-js`;
+   Stripe.js loads only on `/checkout`, on submit). The details are locked while the form is open; "Edit order" closes it
+   and uses a new Idempotency-Key. An API answering `hosted` falls back to the `checkoutUrl` redirect. No new env vars:
+   the publishable key comes from the API. E2E replaces Stripe.js with `e2e/fake-stripe.ts` and never calls Stripe.
 3. Stripe returns to `/checkout/complete?signup=<id>` (cancel: `/checkout?plan=…&cancelled=1`). The page polls
    `app/checkout/complete/status/route.ts`, which reads the cookie server-side and calls
    `GET /v1/public/signups/:id` with `x-sidekick-signup-token`. The browser never sees the token.

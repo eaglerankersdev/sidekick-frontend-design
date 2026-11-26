@@ -8,7 +8,10 @@ async function shot(page: Page, name: string) {
     window.scrollTo(0, 0);
   });
   const suffix = test.info().project.name === "mobile" ? "390" : "desktop";
+  // A full-page capture would paint the fixed phone bar mid-page; show it where it ends up instead, under the content.
+  const css = await page.addStyleTag({ content: "[data-sticky-bar]{position:static!important}" });
   await page.screenshot({ path: `docs/screenshots/${name}-${suffix}.png`, fullPage: true, animations: "disabled" });
+  await css.evaluate((el) => (el as Element).remove());
 }
 
 const unique = (prefix: string) => `${prefix}-${test.info().project.name}-${Date.now()}@example.com`;
@@ -62,7 +65,7 @@ test("upgrade by email code: wrong code, compare, add-ons, pay, complete", async
   expect(await page.evaluate(() => document.cookie)).not.toContain("sk_account");
 
   const compare = page.getByRole("table");
-  await expect(compare).toContainText("Team members included25");
+  await expect(compare).toContainText("Team members25");
   await expect(compare).toContainText("Website pagesHome pageUp to 6");
   await expect(page.getByRole("radio", { name: /Growth/ })).toBeChecked();
 

@@ -3,6 +3,9 @@
 // Signups: "limit@…" → 429, "bad@…" → 400 on email, "sold@…" → 409 PLAN_UNAVAILABLE. After the mock "Stripe" page:
 // emails starting "existing" → existing_account, "fail" → failed, "expired" → expired, "slow" stays processing, others → ready
 // after two processing polls.
+// Embedded Checkout: GET /v1/public/stripe-config answers a test publishable key (STRIPE_MODE=off → 503). Signups asking for
+// checkoutMode "embedded" get a client secret "cs_test_<signupId>_secret_mock" (e2e/fake-stripe.ts pays it); emails starting
+// "hosted" get the hosted page instead, as an API without embedded support would.
 // Upgrades: any email gets a 202 challenge ("limit@" → 429); code 123456 verifies, 999999 → 429, anything else → 400 CODE_INVALID.
 // Emails starting "multi" own two businesses, "nobiz" none, "sca" needs a bank check (requires_action → mock invoice page),
 // "decline" fails; others own one Basic business. A lower plan is scheduled for the renewal with an over-limit warning.
@@ -83,6 +86,9 @@ http
       if (req.method === "GET" && url.pathname === "/v1/public/pricing") {
         return process.env.PRICING_MODE === "down" ? send(503, { code: "UNAVAILABLE" }) : send(200, pricing);
       }
+      if (req.method === "GET" && url.pathname === "/v1/public/stripe-config") {
+        return process.env.STRIPE_MODE === "off" ? send(503, { code: "STRIPE_NOT_CONFIGURED" }) : send(200, { publishableKey: "pk_test_mockEmbedded123" });
+      }
       if (req.method === "POST" && url.pathname === "/v1/public/inquiries") {
         if (req.headers.authorization !== "Bearer test-site-token") return send(401, { code: "UNAUTHORIZED" });
         const data = JSON.parse(body || "{}");
@@ -103,7 +109,10 @@ http
         if (prior && JSON.stringify(prior.data) !== JSON.stringify(data)) return send(409, { code: "IDEMPOTENCY_MISMATCH" });
         const s = prior ?? { id: `su_${signups.size + 1}`, key, data, token: `tok_${Math.random().toString(36).slice(2)}`, paid: false, polls: 0, headers: req.headers };
         signups.set(s.id, s);
-        return send(201, { signupId: s.id, checkoutUrl: `${self}/__stripe/${s.id}`, signupToken: s.token, expiresAt: new Date(Date.now() + 864e5).toISOString() });
+        const expiresAt = new Date(Date.now() + 864e5).toISOString();
+        if (data.checkoutMode === "embedded" && !email.startsWith("hosted"))
+          return send(201, { signupId: s.id, checkoutMode: "embedded", clientSecret: `cs_test_${s.id}_secret_mock`, checkoutUrl: null, signupToken: s.token, expiresAt });
+        return send(201, { signupId: s.id, checkoutMode: "hosted", checkoutUrl: `${self}/__stripe/${s.id}`, signupToken: s.token, expiresAt });
       }
       const statusMatch = url.pathname.match(/^\/v1\/public\/signups\/([\w-]+)$/);
       if (req.method === "GET" && statusMatch) {

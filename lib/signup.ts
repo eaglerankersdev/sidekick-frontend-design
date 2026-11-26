@@ -28,13 +28,18 @@ export function safeRedirectUrl(value: unknown): string | null {
   return null;
 }
 
-/** POST /v1/public/signups → 201. */
+/** POST /v1/public/signups → 201. `checkoutMode: "embedded"` answers carry a Stripe client secret instead of a URL. */
 export const createdSchema = z.object({
   signupId: z.string().regex(SIGNUP_ID),
-  checkoutUrl: z.string().min(1),
+  checkoutUrl: z.string().min(1).nullish(),
   signupToken: z.string().min(1).max(512),
   expiresAt: z.string().min(1),
+  checkoutMode: z.enum(["embedded", "hosted"]).optional(),
+  clientSecret: z.string().nullish(),
 });
+
+/** A Checkout Session client secret (`cs_…_secret_…`): made for the browser, unlike the signup token. */
+export const CLIENT_SECRET = /^cs_[A-Za-z0-9_]{1,500}$/;
 
 const next = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("wait") }),
@@ -84,6 +89,8 @@ export type CheckoutField = "name" | "email" | "phone" | "businessName" | "accep
 
 export type CheckoutState =
   | { status: "idle" }
+  /** Embedded Stripe Checkout: the browser mounts Stripe's form with this client secret (the signup token stays in the cookie). */
+  | { status: "embedded"; signupId: string; clientSecret: string }
   /** `nextKey`: a fresh Idempotency-Key after the API rejected the request (4xx), so the corrected retry is a new signup. */
   | { status: "error"; formError?: string; errors?: Partial<Record<CheckoutField, string>>; nextKey?: string; salesLink?: boolean };
 

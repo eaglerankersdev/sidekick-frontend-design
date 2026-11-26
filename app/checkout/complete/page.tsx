@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { CheckoutStatus } from "@/components/marketing/CheckoutStatus";
-import { section, wrap } from "@/components/marketing/tw";
+import { cardBase, pageBg } from "@/components/marketing/checkout-styles";
+import { wrap } from "@/components/marketing/tw";
 import { SIGNUP_ID } from "@/lib/signup";
 
 export const metadata: Metadata = {
@@ -12,9 +13,11 @@ export default async function CheckoutCompletePage({ searchParams }: { searchPar
   const raw = (await searchParams).signup;
   const signupId = typeof raw === "string" && SIGNUP_ID.test(raw) ? raw : null;
   return (
-    <section className={`${section} grid min-h-[70vh] items-center bg-white`}>
-      <div className={`${wrap} max-w-[calc(640px+var(--gutter)*2)]`}>
-        <CheckoutStatus signupId={signupId} />
+    <section className={`${pageBg} grid min-h-[70vh] items-center py-[clamp(40px,6vw,88px)]`}>
+      <div className={`${wrap} max-w-[calc(680px+var(--gutter)*2)]`}>
+        <div className={`${cardBase} px-[clamp(20px,5vw,48px)] py-[clamp(24px,5vw,44px)]`}>
+          <CheckoutStatus signupId={signupId} />
+        </div>
       </div>
     </section>
   );

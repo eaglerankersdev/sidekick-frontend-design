@@ -73,6 +73,29 @@ describe("startCheckout", () => {
     expect(jar.set).not.toHaveBeenCalled();
   });
 
+  it("embedded mode: asks for it, stores the cookie and hands the browser only the client secret", async () => {
+    const embedded = { ...created, checkoutUrl: null, checkoutMode: "embedded", clientSecret: "cs_test_a1B2_secret_c3D4" };
+    fetchMock.mockResolvedValueOnce(json(201, embedded));
+    const r = await startCheckout(idle, form({ checkoutMode: "embedded" }));
+    expect(r).toEqual({ status: "embedded", signupId: "su_123", clientSecret: "cs_test_a1B2_secret_c3D4" });
+    expect(JSON.stringify(r)).not.toContain("secret-token");
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toMatchObject({ checkoutMode: "embedded" });
+    expect(jar.set).toHaveBeenCalledWith("sk_signup_su_123", "secret-token", expect.objectContaining({ httpOnly: true, path: "/checkout" }));
+  });
+
+  it("embedded mode falls back to the hosted page when the API answers hosted, and never sends the mode otherwise", async () => {
+    fetchMock.mockResolvedValueOnce(json(201, { ...created, checkoutMode: "hosted", clientSecret: null }));
+    await expect(startCheckout(idle, form({ checkoutMode: "embedded" }))).rejects.toMatchObject({ url: created.checkoutUrl });
+    await expect(startCheckout(idle, form())).rejects.toThrow("NEXT_REDIRECT");
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).not.toHaveProperty("checkoutMode");
+  });
+
+  it("embedded mode with a malformed secret and no URL is an error, not a redirect", async () => {
+    fetchMock.mockResolvedValueOnce(json(201, { ...created, checkoutUrl: null, checkoutMode: "embedded", clientSecret: "<script>" }));
+    expect(await startCheckout(idle, form({ checkoutMode: "embedded" }))).toMatchObject({ status: "error", formError: expect.stringMatching(/couldn't start checkout/) });
+    expect(jar.set).not.toHaveBeenCalled();
+  });
+
   it("validates on the server before calling the API", async () => {
     const r = await startCheckout(idle, form({ name: "S", email: "nope", phone: "12", businessName: "", acceptTerms: null }));
     expect(r).toMatchObject({ status: "error", errors: { name: expect.any(String), email: expect.any(String), phone: expect.any(String), businessName: expect.any(String), acceptTerms: expect.any(String) } });
