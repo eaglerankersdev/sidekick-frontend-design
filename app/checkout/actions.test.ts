@@ -50,6 +50,15 @@ describe("startCheckout", () => {
     expect(jar.set).toHaveBeenCalledWith("sk_signup_su_123", "secret-token", { httpOnly: true, secure: true, sameSite: "lax", path: "/checkout", maxAge: 172800 });
   });
 
+  it("sends add-ons only when something was added, clamped to the offered limits", async () => {
+    await expect(startCheckout(idle, form({ extraSeats: "3", creditPacks: "2", callRail: "on" }))).rejects.toThrow("NEXT_REDIRECT");
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).addons).toEqual({ extraSeats: 3, creditPacks: 2, callRail: true });
+    await expect(startCheckout(idle, form({ extraSeats: "999", creditPacks: "-4" }))).rejects.toThrow("NEXT_REDIRECT");
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body).addons).toEqual({ extraSeats: 50, creditPacks: 0, callRail: false });
+    await expect(startCheckout(idle, form({ extraSeats: "0", creditPacks: "0" }))).rejects.toThrow("NEXT_REDIRECT");
+    expect(JSON.parse(fetchMock.mock.calls[2][1].body)).not.toHaveProperty("addons");
+  });
+
   it("drops Secure only on a local http host", async () => {
     host = "127.0.0.1:3311";
     await expect(startCheckout(idle, form())).rejects.toThrow("NEXT_REDIRECT");

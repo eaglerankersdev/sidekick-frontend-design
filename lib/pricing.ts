@@ -35,6 +35,13 @@ export const pricingSchema = z.object({
   currency: z.string().regex(/^[a-z]{3}$/i),
   plans: z.array(planSchema).min(1),
   topUp: z.object({ credits: z.number().int().positive(), priceMinor: minor }).nullable(),
+  /** Optional until every API answers with it; lib/addons.ts falls back to `extraMemberMinor` and `topUp`. Null = not sold. */
+  addons: z
+    .object({
+      extraMember: z.object({ priceMinor: minor, interval: z.literal("month") }).nullable().optional(),
+      creditPack: z.object({ credits: z.number().int().positive(), priceMinor: minor }).nullable().optional(),
+    })
+    .optional(),
 });
 
 export type Pricing = z.infer<typeof pricingSchema>;
@@ -82,3 +89,16 @@ export function formatMoney(amountMinor: number, currency: string) {
 
 /** A plan can be bought online only when the API says so and has a price. */
 export const isPurchasable = (p: LivePlan) => p.available && p.priceMinor !== null;
+
+const num = (n: number) => n.toLocaleString("en-US");
+
+/** The allowances a buyer compares, as label/value pairs (checkout plan card and the upgrade comparison). */
+export function planFacts(p: LivePlan): [string, string][] {
+  const pages = p.website.maxPages === null ? "Ask sales" : p.website.maxPages === 1 ? "Home page" : `Up to ${p.website.maxPages}`;
+  return [
+    ["Service workspaces", num(p.workspaces)],
+    ["AI credits each month", num(p.aiCredits)],
+    ["Team members included", num(p.teamMembers)],
+    ["Website pages", pages],
+  ];
+}

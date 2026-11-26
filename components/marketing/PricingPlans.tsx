@@ -15,7 +15,7 @@ function websiteLine(w: LivePlan["website"]) {
 }
 
 /** Filled squares = workspaces in this plan, out of the three a business can have. */
-function WorkspaceBlocks({ n, onDark }: { n: number; onDark?: boolean }) {
+export function WorkspaceBlocks({ n, onDark }: { n: number; onDark?: boolean }) {
   return (
     <span aria-hidden className="flex gap-1">
       {[0, 1, 2].map((i) => (

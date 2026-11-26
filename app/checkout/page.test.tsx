@@ -19,7 +19,7 @@ describe("/checkout", () => {
   it("shows the form and the live order summary", async () => {
     const html = await render({ plan: "growth" });
     expect(html).toContain("Start your Growth plan");
-    for (const s of ["$99.99", "1,500", "$10 per month each", 'autoComplete="organization"'.toLowerCase()]) expect(html.toLowerCase()).toContain(s.toLowerCase());
+    for (const s of ["$99.99", "1,500", "$10/month each", "1,000 credits for $10, one-time", "Upgrade your plan", "/checkout/upgrade?plan=growth", 'autoComplete="organization"'.toLowerCase()]) expect(html.toLowerCase()).toContain(s.toLowerCase());
     expect(html).not.toContain("Checkout cancelled");
     expect(await render({ plan: "growth", cancelled: "1" })).toContain("Checkout cancelled. Nothing was charged.");
   });
