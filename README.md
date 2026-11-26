@@ -10,7 +10,7 @@ Tailwind CSS 4 for new and rewritten UI (pricing, contact, checkout). See "Styli
 | `npm run dev` | Local dev server |
 | `npm run build` / `npm start` | Production build and server |
 | `npm run lint` | Type check (`tsc --noEmit`) |
-| `npm test` | Unit tests (Vitest): money formatting, plan parsing, pricing contract, contact action |
+| `npm test` | Unit tests (Vitest): money formatting, plan parsing, pricing contract, contact action, checkout action, status route, redirect safety |
 | `npm run test:e2e` | Playwright against a production build and `e2e/mock-api.mjs` (a stand-in for the SideKick API) |
 
 First Playwright run: `npx playwright install chromium`.
@@ -22,8 +22,8 @@ actions and never reach the browser.
 
 | Variable | Used by | Notes |
 |---|---|---|
-| `SIDEKICK_API_URL` | `/pricing` (`GET /v1/public/pricing`, cached 5 minutes) and `/contact` (`POST /v1/public/inquiries`) | Base URL of the SideKick API, no trailing `/v1`. Example: `https://api.example.com` |
-| `SIDEKICK_SITE_TOKEN` | `/contact` | Bearer token the API issues for the public website. Sent as `authorization: Bearer …` |
+| `SIDEKICK_API_URL` | `/pricing` and `/checkout` (`GET /v1/public/pricing`, cached 5 minutes), `/contact` (`POST /v1/public/inquiries`), `/checkout` (`POST /v1/public/signups`, `GET /v1/public/signups/:id`) | Base URL of the SideKick API, no trailing `/v1`. Example: `https://api.example.com` |
+| `SIDEKICK_SITE_TOKEN` | `/contact`, `/checkout` | Bearer token the API issues for the public website. Sent as `authorization: Bearer …` |
 | `NEXT_PUBLIC_SITE_URL` | metadata | Canonical site URL (unchanged) |
 
 Without `SIDEKICK_API_URL`, or when the API fails or returns an invalid body, the pricing page shows the plans with
@@ -39,6 +39,26 @@ form answers "Our contact service is not available yet".
 `Idempotency-Key` (one UUID per form render, rotated only after the API rejects the request) and
 `x-sidekick-client-ip` (first `x-forwarded-for` hop). API 400/422 field errors, 429 and 503 become friendly
 messages (`lib/inquiry.ts`). `?plan=basic|growth|enterprise` preselects the plan; any other value is ignored.
+
+## Checkout (pay first) → SideKick API → Stripe
+
+1. Pricing "Get started" → `/checkout?plan=basic|growth|enterprise` (any other plan redirects to `/pricing`). The plan
+   name, price and allowances come from `GET /v1/public/pricing`; a plan that is missing, unavailable or unpriced (or
+   pricing that is down) shows "Talk to sales" instead of the form.
+2. `app/checkout/actions.ts` validates on the server, then posts `{ planKey, name, email, phone, businessName,
+   acceptTerms: true }` to `POST /v1/public/signups` with the site token, an `Idempotency-Key` (one UUID per form
+   render, rotated after a 4xx) and `x-sidekick-client-ip`. On 201 it stores `signupToken` in an httpOnly, Secure,
+   SameSite=Lax cookie `sk_signup_<signupId>` (path `/checkout`, 2 days) and redirects (303 without JS) to the
+   returned Stripe `checkoutUrl`. 400 issues map to fields; 409/429/503 become friendly messages.
+3. Stripe returns to `/checkout/complete?signup=<id>` (cancel: `/checkout?plan=…&cancelled=1`). The page polls
+   `app/checkout/complete/status/route.ts`, which reads the cookie server-side and calls
+   `GET /v1/public/signups/:id` with `x-sidekick-signup-token`. The browser never sees the token.
+4. `ready` → auto-forward to the API's set-password URL (button fallback) and the cookie is cleared;
+   `existing_account` → sign-in button; `failed`/`expired` → retry `/checkout?plan=…`; no answer after ~2 minutes →
+   "we'll also email you a link". Redirect targets must be https (http only on localhost when the API itself is local)
+   and come from the API (`lib/signup.ts`, `safeRedirectUrl`).
+
+The return URL never activates anything: the account exists only after the backend sees Stripe's webhook.
 
 ## Styling
 

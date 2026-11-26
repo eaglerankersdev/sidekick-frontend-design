@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
+import { usePathname } from "next/navigation";
 import styles from "./SideKickPet.module.css";
 
 type Pose = "idle" | "wave";
@@ -20,6 +21,8 @@ export function SideKickPet() {
   const [reduced, setReduced] = useState(true);
   const [obstructed, setObstructed] = useState(false);
   const [reaction, setReaction] = useState<Pose | null>(null);
+  // Checkout stays free of distractions next to the payment details.
+  const onCheckout = usePathname()?.startsWith("/checkout");
 
   useEffect(() => {
     try { if (sessionStorage.getItem(HIDDEN_KEY)) return; } catch { /* Storage is optional. */ }
@@ -87,7 +90,7 @@ export function SideKickPet() {
     setDismissed(true);
   }
 
-  if (!ready || dismissed) return null;
+  if (!ready || dismissed || onCheckout) return null;
   const currentPose = reaction ?? "idle";
 
   return (
