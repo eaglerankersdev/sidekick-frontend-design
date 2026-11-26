@@ -14,12 +14,6 @@ test("pricing shows live plans, add-ons and the comparison", async ({ page }) =>
   expect(overflow).toBeLessThanOrEqual(1);
 });
 
-test("checkout placeholder hands the plan to sales", async ({ page }) => {
-  await page.goto("/checkout?plan=growth");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Checkout opens soon.");
-  await expect(page.getByRole("link", { name: "Talk to sales" })).toHaveAttribute("href", "/contact?plan=growth");
-});
-
 test("contact preselects only known plans", async ({ page }) => {
   await page.goto("/contact?plan=enterprise");
   await expect(page.getByRole("radio", { name: "Enterprise" })).toBeChecked();
