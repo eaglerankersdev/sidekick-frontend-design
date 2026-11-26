@@ -1,100 +1,74 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { headers } from "next/headers";
+import { parsePlanKey } from "@/lib/pricing";
+import { EMAIL, FRIENDLY, MESSAGES, UUID, mapApiResponse, type LeadField, type LeadState } from "@/lib/inquiry";
 
-export type LeadState =
-  | { status: "idle" }
-  | { status: "success"; audience: "provider" | "reseller" }
-  | { status: "error"; formError?: string; errors?: Record<string, string> };
-
-/**
- * Server-side validation, abuse controls and routing of reseller vs provider
- * inquiries. Delivery goes to LEAD_WEBHOOK_URL (an approved endpoint or sales
- * integration). Without it configured, submissions are rejected with a clear
- * message rather than silently discarded (brief §5 Contact form).
- */
-
-// Simple in-memory rate limiter (per instance). Replace with a shared store in production.
-const buckets = new Map<string, { count: number; reset: number }>();
-const LIMIT = 5;
-const WINDOW_MS = 10 * 60 * 1000;
-
-function rateLimited(key: string) {
-  const now = Date.now();
-  const b = buckets.get(key);
-  if (!b || b.reset < now) {
-    buckets.set(key, { count: 1, reset: now + WINDOW_MS });
-    return false;
-  }
-  b.count += 1;
-  return b.count > LIMIT;
-}
-
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+export type { LeadState } from "@/lib/inquiry";
 
 export async function submitLead(_prev: LeadState, formData: FormData): Promise<LeadState> {
+  const field = (k: string) => String(formData.get(k) ?? "").trim();
   const audience = formData.get("audience") === "reseller" ? "reseller" : "provider";
-  const name = String(formData.get("name") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim();
-  const business = String(formData.get("business") ?? "").trim();
-  const industry = String(formData.get("industry") ?? "").trim();
-  const phone = String(formData.get("phone") ?? "").trim();
-  const message = String(formData.get("message") ?? "").trim();
-  const honeypot = String(formData.get("website") ?? "");
+  const name = field("name");
+  const email = field("email");
+  const business = field("business");
+  const industry = field("industry");
+  const phone = field("phone");
+  const message = field("message");
+  // Only the three plan keys are accepted; "Not sure" or anything else sends no plan.
+  const planKey = audience === "provider" ? parsePlanKey(field("plan")) : null;
+  const honeypot = field("website");
   const startedAt = Number(formData.get("startedAt") ?? 0);
+  const sentKey = field("idempotencyKey");
+  const idempotencyKey = UUID.test(sentKey) ? sentKey : randomUUID();
 
   // Spam protection: honeypot filled or submitted faster than a human could.
   if (honeypot || (startedAt && Date.now() - startedAt < 2500)) {
-    // Pretend success so bots learn nothing; nothing is stored.
+    // Pretend success so bots learn nothing; nothing is sent.
     return { status: "success", audience };
   }
 
-  const errors: Record<string, string> = {};
-  if (name.length < 2) errors.name = "Please enter your name.";
-  if (!EMAIL.test(email)) errors.email = "Please enter a valid work email.";
-  if (business.length < 2) errors.business = "Please enter your business name.";
-  if (!industry) errors.industry = audience === "reseller" ? "Please choose your reseller interest." : "Please choose your industry.";
-  if (message.length > 1200) errors.message = "Please keep your message under 1200 characters.";
-  if (Object.keys(errors).length) return { status: "error", errors, formError: "Please fix the highlighted fields." };
+  const errors: Partial<Record<LeadField, string>> = {};
+  if (name.length < 2 || name.length > 120) errors.name = FRIENDLY.name;
+  if (!EMAIL.test(email) || email.length > 254) errors.email = FRIENDLY.email;
+  if (business.length < 2 || business.length > 160) errors.business = FRIENDLY.business;
+  if (!industry || industry.length > 80) errors.industry = audience === "reseller" ? "Please choose your reseller interest." : "Please choose your industry.";
+  if (phone.length > 40) errors.phone = FRIENDLY.phone;
+  if (message.length > 1200) errors.message = FRIENDLY.message;
+  if (Object.keys(errors).length) return { status: "error", errors, formError: MESSAGES.fix };
 
-  const h = await headers();
-  const ip = (h.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
-  if (rateLimited(ip)) {
-    return { status: "error", formError: "Too many requests from this connection. Please try again in a few minutes." };
-  }
+  const base = process.env.SIDEKICK_API_URL;
+  const token = process.env.SIDEKICK_SITE_TOKEN;
+  if (!base || !token) return { status: "error", formError: MESSAGES.unavailable };
 
-  const endpoint = process.env.LEAD_WEBHOOK_URL;
-  if (!endpoint) {
-    return {
-      status: "error",
-      formError: "The demo request service is not configured yet. Please try again later.",
-    };
-  }
-
-  const payload = {
-    type: audience === "reseller" ? "reseller_inquiry" : "demo_request",
-    audience,
-    name,
-    email,
-    business,
-    industry,
-    phone: phone || null,
-    message: message || null,
-    source: "public-website",
-    submittedAt: new Date().toISOString(),
-  };
+  const clientIp = ((await headers()).get("x-forwarded-for") ?? "").split(",")[0].trim();
 
   try {
-    const res = await fetch(endpoint, {
+    const res = await fetch(`${base.replace(/\/+$/, "")}/v1/public/inquiries`, {
       method: "POST",
-      headers: { "content-type": "application/json", ...(process.env.LEAD_WEBHOOK_TOKEN ? { authorization: `Bearer ${process.env.LEAD_WEBHOOK_TOKEN}` } : {}) },
-      body: JSON.stringify(payload),
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${token}`,
+        "Idempotency-Key": idempotencyKey,
+        ...(clientIp ? { "x-sidekick-client-ip": clientIp } : {}),
+      },
+      body: JSON.stringify({
+        audience,
+        name,
+        email,
+        business,
+        industry,
+        ...(phone ? { phone } : {}),
+        ...(message ? { message } : {}),
+        ...(planKey ? { planKey } : {}),
+        source: "public-website",
+      }),
       cache: "no-store",
+      signal: AbortSignal.timeout(10_000),
     });
-    if (!res.ok) throw new Error(`Lead endpoint responded ${res.status}`);
+    return await mapApiResponse(res, audience);
   } catch {
-    return { status: "error", formError: "We could not send your request right now. Please try again in a moment." };
+    return { status: "error", formError: MESSAGES.failed };
   }
-
-  return { status: "success", audience };
 }
