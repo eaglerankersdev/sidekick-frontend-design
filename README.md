@@ -23,7 +23,7 @@ actions and never reach the browser.
 | Variable | Used by | Notes |
 |---|---|---|
 | `SIDEKICK_API_URL` | `/pricing` (`GET /v1/public/pricing`, cached 5 minutes) and `/contact` (`POST /v1/public/inquiries`) | Base URL of the SideKick API, no trailing `/v1`. Example: `https://api.example.com` |
-| `PUBLIC_SITE_TOKEN` | `/contact` | Bearer token the API issues for the public website. Sent as `authorization: Bearer …` |
+| `SIDEKICK_SITE_TOKEN` | `/contact` | Bearer token the API issues for the public website. Sent as `authorization: Bearer …` |
 | `NEXT_PUBLIC_SITE_URL` | metadata | Canonical site URL (unchanged) |
 
 Without `SIDEKICK_API_URL`, or when the API fails or returns an invalid body, the pricing page shows the plans with

@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 // Runs the production build against e2e/mock-api.mjs (a stand-in for the SideKick API).
-const env = { SIDEKICK_API_URL: "http://127.0.0.1:4999", PUBLIC_SITE_TOKEN: "test-site-token" };
+const env = { SIDEKICK_API_URL: "http://127.0.0.1:4999", SIDEKICK_SITE_TOKEN: "test-site-token" };
 
 export default defineConfig({
   testDir: "e2e",

@@ -39,7 +39,7 @@ export async function submitLead(_prev: LeadState, formData: FormData): Promise<
   if (Object.keys(errors).length) return { status: "error", errors, formError: MESSAGES.fix };
 
   const base = process.env.SIDEKICK_API_URL;
-  const token = process.env.PUBLIC_SITE_TOKEN;
+  const token = process.env.SIDEKICK_SITE_TOKEN;
   if (!base || !token) return { status: "error", formError: MESSAGES.unavailable };
 
   const clientIp = ((await headers()).get("x-forwarded-for") ?? "").split(",")[0].trim();

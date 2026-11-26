@@ -15,7 +15,7 @@ const json = (status: number, body: unknown = {}) => new Response(JSON.stringify
 let fetchMock: ReturnType<typeof vi.fn>;
 beforeEach(() => {
   vi.stubEnv("SIDEKICK_API_URL", "https://api.example.test/");
-  vi.stubEnv("PUBLIC_SITE_TOKEN", "site-token");
+  vi.stubEnv("SIDEKICK_SITE_TOKEN", "site-token");
   fetchMock = vi.fn(async () => json(201, { id: "inq_1" }));
   vi.stubGlobal("fetch", fetchMock);
 });
@@ -63,7 +63,7 @@ describe("submitLead", () => {
   });
 
   it("says the service is not available when env is missing", async () => {
-    vi.stubEnv("PUBLIC_SITE_TOKEN", "");
+    vi.stubEnv("SIDEKICK_SITE_TOKEN", "");
     expect(await submitLead({ status: "idle" }, form())).toMatchObject({ status: "error", formError: expect.stringMatching(/not available yet/) });
     expect(fetchMock).not.toHaveBeenCalled();
   });
